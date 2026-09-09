@@ -1,0 +1,41 @@
+# CreditWise — Python Dependencies
+# Generated for Python 3.13.2
+# Pin versions once the environment is confirmed stable.
+# Install with: pip install -r requirements.txt
+
+# Core data science
+pandas==2.3.2
+numpy==2.2.3
+scipy==1.16.3
+
+# Machine learning
+scikit-learn==1.7.2
+xgboost==3.1.1
+lightgbm==4.7.0
+
+# Class imbalance
+imbalanced-learn==0.14.2
+
+# Explainability
+shap==0.52.0
+
+# Visualisation
+matplotlib==3.10.0
+seaborn==0.13.2
+plotly==6.3.0
+
+# Model persistence
+joblib==1.5.2
+
+# Dashboard
+streamlit==1.49.0
+
+# Testing
+pytest>=8.0.0
+
+# Optional: hyperparameter tuning (not installed by default)
+# optuna>=3.6.0
+
+# Notebook support (already installed — listed for completeness)
+# jupyter
+# jupyterlab
