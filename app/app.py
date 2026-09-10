@@ -17,10 +17,14 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 
-# Ensure repository root is on Python path
-REPO_ROOT = Path(__file__).resolve().parent.parent
+# Ensure repository root and app directory are on Python path
+APP_DIR = Path(__file__).resolve().parent
+REPO_ROOT = APP_DIR.parent
+
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
+if str(APP_DIR) not in sys.path:
+    sys.path.insert(0, str(APP_DIR))
 
 # Backend imports
 from src.config import (
@@ -34,18 +38,31 @@ from src.predict import (
 )
 from src.explainability import explain_single, TREE_MODEL_TYPES
 
-# Superdesign Modular Component Imports
-from app.components.sidebar import render_sidebar
-from app.components.header import render_page_header
-from app.components.cards import (
-    render_metric_card, render_pipeline_flow, render_decision_card
-)
-from app.components.risk_gauge import render_risk_gauge
-from app.components.charts import (
-    create_model_comparison_bar_chart, create_confusion_matrix_heatmap,
-    create_shap_summary_bar_chart
-)
-from app.components.explanations import render_local_shap_explanation
+# Superdesign Modular Component Imports (Robust to execution directory)
+try:
+    from components.sidebar import render_sidebar
+    from components.header import render_page_header
+    from components.cards import (
+        render_metric_card, render_pipeline_flow, render_decision_card
+    )
+    from components.risk_gauge import render_risk_gauge
+    from components.charts import (
+        create_model_comparison_bar_chart, create_confusion_matrix_heatmap,
+        create_shap_summary_bar_chart
+    )
+    from components.explanations import render_local_shap_explanation
+except ModuleNotFoundError:
+    from app.components.sidebar import render_sidebar
+    from app.components.header import render_page_header
+    from app.components.cards import (
+        render_metric_card, render_pipeline_flow, render_decision_card
+    )
+    from app.components.risk_gauge import render_risk_gauge
+    from app.components.charts import (
+        create_model_comparison_bar_chart, create_confusion_matrix_heatmap,
+        create_shap_summary_bar_chart
+    )
+    from app.components.explanations import render_local_shap_explanation
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
