@@ -1,0 +1,377 @@
+<!DOCTYPE html><html lang="en" class="dark"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CreditWise Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            navy: {
+              900: '#0B1220',
+              800: '#111827',
+              700: '#172033',
+              600: '#1F2937'
+            },
+            primary: '#2563EB',
+            cyan: '#06B6D4',
+            success: '#10B981',
+            warning: '#F59E0B',
+            danger: '#EF4444',
+            content: {
+              primary: '#F8FAFC',
+              secondary: '#94A3B8',
+              muted: '#64748B'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #0B1220;
+      color: #F8FAFC;
+    }
+    
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0B1220;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1F2937;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #374151;
+    }
+  </style>
+</head>
+<body>
+  <div class="flex h-screen overflow-hidden bg-navy-900" data-sd-id="1">
+    
+    <!-- Sidebar -->
+    <aside class="w-64 flex-shrink-0 border-r border-navy-600/50 bg-navy-900 flex flex-col" data-sd-id="2">
+      <div class="p-6" data-sd-id="3">
+        <div class="flex items-center gap-3" data-sd-id="4">
+          <div class="w-8 h-8 rounded bg-gradient-to-br from-primary to-cyan flex items-center justify-center text-white font-bold" data-sd-id="5">
+            <iconify-icon icon="lucide:shield" class="text-xl"></iconify-icon>
+          </div>
+          <h1 class="text-xl font-bold tracking-tight" data-sd-id="6">CreditWise</h1>
+        </div>
+        <p class="text-[10px] font-semibold text-primary uppercase tracking-wider mt-2" data-sd-id="7">AI Credit Intelligence</p>
+      </div>
+
+      <nav class="flex-1 px-4 space-y-1 overflow-y-auto mt-4" data-sd-id="8">
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-primary/10 text-primary font-medium text-sm border-l-2 border-primary relative left-[-16px] pl-6 transition-colors" data-sd-id="9">
+          <iconify-icon icon="lucide:layout-dashboard" class="text-lg"></iconify-icon>
+          Dashboard
+        </a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-content-secondary hover:bg-navy-800 hover:text-content-primary font-medium text-sm transition-colors group" data-sd-id="10">
+          <iconify-icon icon="lucide:shield-check" class="text-lg group-hover:text-primary transition-colors"></iconify-icon>
+          Risk Assessment
+        </a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-content-secondary hover:bg-navy-800 hover:text-content-primary font-medium text-sm transition-colors group" data-sd-id="11">
+          <iconify-icon icon="lucide:brain-circuit" class="text-lg group-hover:text-primary transition-colors"></iconify-icon>
+          Model Intelligence
+        </a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-content-secondary hover:bg-navy-800 hover:text-content-primary font-medium text-sm transition-colors group" data-sd-id="12">
+          <iconify-icon icon="lucide:sparkles" class="text-lg group-hover:text-primary transition-colors"></iconify-icon>
+          Explainability
+        </a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-content-secondary hover:bg-navy-800 hover:text-content-primary font-medium text-sm transition-colors group" data-sd-id="13">
+          <iconify-icon icon="lucide:sliders-horizontal" class="text-lg group-hover:text-primary transition-colors"></iconify-icon>
+          What-If Simulator
+        </a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-content-secondary hover:bg-navy-800 hover:text-content-primary font-medium text-sm transition-colors group" data-sd-id="14">
+          <iconify-icon icon="lucide:book-open" class="text-lg group-hover:text-primary transition-colors"></iconify-icon>
+          Methodology
+        </a>
+      </nav>
+
+      <div class="p-4 border-t border-navy-600/50 space-y-4" data-sd-id="15">
+        <div class="space-y-2" data-sd-id="16">
+          <div class="flex items-center justify-between text-xs" data-sd-id="17">
+            <span class="text-content-secondary" data-sd-id="18">Model Status</span>
+            <div class="flex items-center gap-1.5 text-success" data-sd-id="19">
+              <span class="w-2 h-2 rounded-full bg-success" data-sd-id="20"></span>
+              <span class="font-medium" data-sd-id="21">Ready</span>
+            </div>
+          </div>
+          <div class="flex items-center justify-between text-xs" data-sd-id="22">
+            <span class="text-content-secondary" data-sd-id="23">Dataset</span>
+            <div class="flex items-center gap-1.5 text-success" data-sd-id="24">
+              <span class="w-2 h-2 rounded-full bg-success" data-sd-id="25"></span>
+              <span class="font-medium" data-sd-id="26">Loaded</span>
+            </div>
+          </div>
+        </div>
+        <div class="px-3 py-2 rounded bg-navy-800 border border-navy-600/50 text-center" data-sd-id="27">
+          <span class="text-[10px] text-content-muted font-medium uppercase tracking-wider" data-sd-id="28">Academic Prototype</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col min-w-0 overflow-hidden relative" data-sd-id="29">
+      
+      <!-- Header -->
+      <header class="h-20 flex-shrink-0 flex items-center justify-between px-8 border-b border-navy-600/50 bg-navy-900/90 backdrop-blur z-10 sticky top-0" data-sd-id="30">
+        <div data-sd-id="31">
+          <h2 class="text-xl font-bold tracking-tight" data-sd-id="32">Credit Intelligence Dashboard</h2>
+          <p class="text-sm text-content-secondary mt-0.5" data-sd-id="33">Explainable AI-powered credit risk assessment</p>
+        </div>
+        <div class="flex items-center gap-6 text-sm" data-sd-id="34">
+          <div class="flex items-center gap-2" data-sd-id="35">
+            <span class="w-2 h-2 rounded-full bg-success animate-pulse" data-sd-id="36"></span>
+            <span class="text-content-secondary" data-sd-id="37">Model Ready</span>
+          </div>
+          <div class="h-4 w-px bg-navy-600" data-sd-id="38"></div>
+          <div class="flex items-center gap-2" data-sd-id="39">
+            <span class="w-2 h-2 rounded-full bg-success" data-sd-id="40"></span>
+            <span class="text-content-secondary" data-sd-id="41">Data Loaded</span>
+          </div>
+          <button class="w-8 h-8 flex items-center justify-center rounded hover:bg-navy-800 text-content-secondary hover:text-content-primary transition-colors" data-sd-id="42">
+            <iconify-icon icon="lucide:refresh-cw" class="text-lg"></iconify-icon>
+          </button>
+        </div>
+      </header>
+
+      <!-- Scrollable Content Area -->
+      <div class="flex-1 overflow-y-auto p-8 space-y-10" data-sd-id="43">
+        
+        <!-- Hero Section -->
+        <section class="max-w-4xl" data-sd-id="44">
+          <h2 class="text-4xl font-bold tracking-tight mb-4 text-white" data-sd-id="45">
+            Understand Credit Risk. <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-cyan" data-sd-id="46">Explain Every Decision.</span>
+          </h2>
+          <p class="text-lg text-content-secondary leading-relaxed mb-8 max-w-3xl" data-sd-id="47">
+            CreditWise estimates default risk using machine learning and explains the factors influencing each prediction. Designed to provide transparent decision support for financial intelligence.
+          </p>
+          <div class="flex flex-wrap gap-4" data-sd-id="48">
+            <button class="px-6 py-3 bg-primary hover:bg-primary/90 text-white font-medium rounded-lg shadow-[0_0_15px_rgba(37,99,235,0.3)] transition-all flex items-center gap-2" data-sd-id="49">
+              Assess Credit Risk
+              <iconify-icon icon="lucide:arrow-right"></iconify-icon>
+            </button>
+            <button class="px-6 py-3 bg-transparent border border-navy-600 hover:border-content-secondary text-content-primary font-medium rounded-lg transition-colors flex items-center gap-2" data-sd-id="50">
+              Explore Models
+            </button>
+          </div>
+        </section>
+
+        <!-- KPI Cards -->
+        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" data-sd-id="51">
+          
+          <div class="bg-navy-700 rounded-xl p-5 border border-navy-600/50 shadow-sm relative overflow-hidden group hover:border-navy-600 transition-colors" data-sd-id="52">
+            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity" data-sd-id="53">
+              <iconify-icon icon="lucide:database" class="text-6xl text-primary"></iconify-icon>
+            </div>
+            <h3 class="text-sm font-medium text-content-secondary mb-1" data-sd-id="54">Dataset</h3>
+            <p class="text-3xl font-bold text-white mb-1" data-sd-id="55">149,391</p>
+            <p class="text-xs text-content-muted" data-sd-id="56">Borrower records</p>
+          </div>
+
+          <div class="bg-navy-700 rounded-xl p-5 border border-navy-600/50 shadow-sm relative overflow-hidden group hover:border-navy-600 transition-colors" data-sd-id="57">
+            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity" data-sd-id="58">
+              <iconify-icon icon="lucide:layers" class="text-6xl text-primary"></iconify-icon>
+            </div>
+            <h3 class="text-sm font-medium text-content-secondary mb-1" data-sd-id="59">Features</h3>
+            <p class="text-3xl font-bold text-white mb-1" data-sd-id="60">17</p>
+            <p class="text-xs text-content-muted" data-sd-id="61">Engineered + original features</p>
+          </div>
+
+          <div class="bg-navy-700 rounded-xl p-5 border border-navy-600/50 shadow-sm relative overflow-hidden group hover:border-navy-600 transition-colors" data-sd-id="62">
+            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity" data-sd-id="63">
+              <iconify-icon icon="lucide:cpu" class="text-6xl text-primary"></iconify-icon>
+            </div>
+            <h3 class="text-sm font-medium text-content-secondary mb-1" data-sd-id="64">Models</h3>
+            <p class="text-3xl font-bold text-white mb-1" data-sd-id="65">4</p>
+            <p class="text-xs text-content-muted" data-sd-id="66">ML algorithms evaluated</p>
+          </div>
+
+          <div class="bg-navy-700 rounded-xl p-5 border border-navy-600/50 shadow-sm relative overflow-hidden group hover:border-navy-600 transition-colors" data-sd-id="67">
+            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity" data-sd-id="68">
+              <iconify-icon icon="lucide:search-check" class="text-6xl text-primary"></iconify-icon>
+            </div>
+            <h3 class="text-sm font-medium text-content-secondary mb-1" data-sd-id="69">Explainability</h3>
+            <p class="text-3xl font-bold text-white mb-1" data-sd-id="70">SHAP</p>
+            <p class="text-xs text-content-muted" data-sd-id="71">Global + local explanations</p>
+          </div>
+
+        </section>
+
+        <!-- ML Pipeline Visual -->
+        <section data-sd-id="72">
+          <div class="flex items-center justify-between mb-4" data-sd-id="73">
+            <h3 class="text-lg font-semibold text-white" data-sd-id="74">ML Intelligence Pipeline</h3>
+          </div>
+          
+          <div class="bg-navy-700 rounded-xl p-6 border border-navy-600/50 overflow-x-auto" data-sd-id="75">
+            <div class="flex items-start min-w-max gap-4 relative py-2" data-sd-id="76">
+              
+              <!-- Connecting Line Background -->
+              <div class="absolute top-[42px] left-10 right-10 h-0.5 bg-navy-600 z-0" data-sd-id="77"></div>
+
+              <!-- Step 1 -->
+              <div class="flex flex-col items-center w-36 relative z-10" data-sd-id="78">
+                <div class="w-14 h-14 rounded-full bg-navy-800 border-2 border-navy-600 flex items-center justify-center text-content-secondary mb-3 shadow-sm" data-sd-id="79">
+                  <iconify-icon icon="lucide:database" class="text-xl"></iconify-icon>
+                </div>
+                <span class="text-[10px] font-bold text-content-muted uppercase tracking-widest mb-1" data-sd-id="80">01 Data</span>
+                <p class="text-xs text-center text-content-secondary" data-sd-id="81">Historical borrower records</p>
+              </div>
+
+              <!-- Step 2 -->
+              <div class="flex flex-col items-center w-36 relative z-10" data-sd-id="82">
+                <div class="w-14 h-14 rounded-full bg-navy-800 border-2 border-navy-600 flex items-center justify-center text-content-secondary mb-3 shadow-sm" data-sd-id="83">
+                  <iconify-icon icon="lucide:filter" class="text-xl"></iconify-icon>
+                </div>
+                <span class="text-[10px] font-bold text-content-muted uppercase tracking-widest mb-1" data-sd-id="84">02 Preprocess</span>
+                <p class="text-xs text-center text-content-secondary" data-sd-id="85">Missing values &amp; cleaning</p>
+              </div>
+
+              <!-- Step 3 -->
+              <div class="flex flex-col items-center w-40 relative z-10" data-sd-id="86">
+                <div class="w-14 h-14 rounded-full bg-navy-800 border-2 border-navy-600 flex items-center justify-center text-content-secondary mb-3 shadow-sm" data-sd-id="87">
+                  <iconify-icon icon="lucide:braces" class="text-xl"></iconify-icon>
+                </div>
+                <span class="text-[10px] font-bold text-content-muted uppercase tracking-widest mb-1" data-sd-id="88">03 Engineer</span>
+                <p class="text-xs text-center text-content-secondary" data-sd-id="89">Financial derived features</p>
+              </div>
+
+              <!-- Step 4 -->
+              <div class="flex flex-col items-center w-36 relative z-10" data-sd-id="90">
+                <div class="w-14 h-14 rounded-full bg-primary/20 border-2 border-primary flex items-center justify-center text-primary mb-3 shadow-[0_0_10px_rgba(37,99,235,0.2)]" data-sd-id="91">
+                  <iconify-icon icon="lucide:cpu" class="text-xl"></iconify-icon>
+                </div>
+                <span class="text-[10px] font-bold text-primary uppercase tracking-widest mb-1" data-sd-id="92">04 Modeling</span>
+                <p class="text-xs text-center text-content-secondary" data-sd-id="93">LR / RF / XGB / LGBM</p>
+              </div>
+
+              <!-- Step 5 -->
+              <div class="flex flex-col items-center w-36 relative z-10" data-sd-id="94">
+                <div class="w-14 h-14 rounded-full bg-navy-800 border-2 border-navy-600 flex items-center justify-center text-content-secondary mb-3 shadow-sm" data-sd-id="95">
+                  <iconify-icon icon="lucide:bar-chart-2" class="text-xl"></iconify-icon>
+                </div>
+                <span class="text-[10px] font-bold text-content-muted uppercase tracking-widest mb-1" data-sd-id="96">05 Evaluation</span>
+                <p class="text-xs text-center text-content-secondary" data-sd-id="97">ROC-AUC / Recall / F1</p>
+              </div>
+
+              <!-- Step 6 -->
+              <div class="flex flex-col items-center w-36 relative z-10" data-sd-id="98">
+                <div class="w-14 h-14 rounded-full bg-cyan/10 border-2 border-cyan/50 flex items-center justify-center text-cyan mb-3 shadow-sm" data-sd-id="99">
+                  <iconify-icon icon="lucide:sparkles" class="text-xl"></iconify-icon>
+                </div>
+                <span class="text-[10px] font-bold text-cyan uppercase tracking-widest mb-1" data-sd-id="100">06 Explain</span>
+                <p class="text-xs text-center text-content-secondary" data-sd-id="101">SHAP global + local</p>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        <!-- Model Performance Table -->
+        <section data-sd-id="102">
+          <div class="flex items-center justify-between mb-4" data-sd-id="103">
+            <h3 class="text-lg font-semibold text-white" data-sd-id="104">Model Performance Overview</h3>
+            <a href="#" class="text-sm text-primary hover:text-primary/80 font-medium flex items-center gap-1" data-sd-id="105">
+              View full metrics <iconify-icon icon="lucide:chevron-right"></iconify-icon>
+            </a>
+          </div>
+
+          <div class="bg-navy-700 rounded-xl border border-navy-600/50 overflow-hidden" data-sd-id="106">
+            <table class="w-full text-sm text-left" data-sd-id="107">
+              <thead class="text-xs text-content-secondary uppercase bg-navy-800/50 border-b border-navy-600/50" data-sd-id="108">
+                <tr data-sd-id="109">
+                  <th scope="col" class="px-6 py-4 font-medium" data-sd-id="110">Model Architecture</th>
+                  <th scope="col" class="px-6 py-4 font-medium" data-sd-id="111">ROC-AUC</th>
+                  <th scope="col" class="px-6 py-4 font-medium" data-sd-id="112">PR-AUC</th>
+                  <th scope="col" class="px-6 py-4 font-medium" data-sd-id="113">Recall</th>
+                  <th scope="col" class="px-6 py-4 font-medium" data-sd-id="114">F1-Score</th>
+                  <th scope="col" class="px-6 py-4 text-right font-medium" data-sd-id="115">Status</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-navy-600/50" data-sd-id="116">
+                <tr class="bg-primary/5 hover:bg-primary/10 transition-colors" data-sd-id="117">
+                  <td class="px-6 py-4 font-medium text-white flex items-center gap-2" data-sd-id="118">
+                    XGBoost
+                  </td>
+                  <td class="px-6 py-4 text-white font-medium" data-sd-id="119">0.865</td>
+                  <td class="px-6 py-4 text-content-primary" data-sd-id="120">0.742</td>
+                  <td class="px-6 py-4 text-content-primary" data-sd-id="121">0.689</td>
+                  <td class="px-6 py-4 text-content-primary" data-sd-id="122">0.714</td>
+                  <td class="px-6 py-4 text-right" data-sd-id="123">
+                    <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-primary/20 text-primary border border-primary/30" data-sd-id="124">
+                      BEST MODEL
+                    </span>
+                  </td>
+                </tr>
+                <tr class="hover:bg-navy-800/30 transition-colors" data-sd-id="125">
+                  <td class="px-6 py-4 font-medium text-content-primary" data-sd-id="126">
+                    LightGBM
+                  </td>
+                  <td class="px-6 py-4 text-content-secondary" data-sd-id="127">0.862</td>
+                  <td class="px-6 py-4 text-content-secondary" data-sd-id="128">0.738</td>
+                  <td class="px-6 py-4 text-content-secondary" data-sd-id="129">0.681</td>
+                  <td class="px-6 py-4 text-content-secondary" data-sd-id="130">0.708</td>
+                  <td class="px-6 py-4 text-right" data-sd-id="131">
+                    <span class="text-content-muted" data-sd-id="132">Evaluated</span>
+                  </td>
+                </tr>
+                <tr class="hover:bg-navy-800/30 transition-colors" data-sd-id="133">
+                  <td class="px-6 py-4 font-medium text-content-primary" data-sd-id="134">
+                    Random Forest
+                  </td>
+                  <td class="px-6 py-4 text-content-secondary" data-sd-id="135">0.841</td>
+                  <td class="px-6 py-4 text-content-secondary" data-sd-id="136">0.712</td>
+                  <td class="px-6 py-4 text-content-secondary" data-sd-id="137">0.645</td>
+                  <td class="px-6 py-4 text-content-secondary" data-sd-id="138">0.678</td>
+                  <td class="px-6 py-4 text-right" data-sd-id="139">
+                    <span class="text-content-muted" data-sd-id="140">Evaluated</span>
+                  </td>
+                </tr>
+                <tr class="hover:bg-navy-800/30 transition-colors" data-sd-id="141">
+                  <td class="px-6 py-4 font-medium text-content-primary" data-sd-id="142">
+                    Logistic Regression
+                  </td>
+                  <td class="px-6 py-4 text-content-secondary" data-sd-id="143">0.798</td>
+                  <td class="px-6 py-4 text-content-secondary" data-sd-id="144">0.645</td>
+                  <td class="px-6 py-4 text-content-secondary" data-sd-id="145">0.582</td>
+                  <td class="px-6 py-4 text-content-secondary" data-sd-id="146">0.610</td>
+                  <td class="px-6 py-4 text-right" data-sd-id="147">
+                    <span class="text-content-muted" data-sd-id="148">Evaluated</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Academic Disclaimer Footer -->
+        <footer class="pt-8 pb-4" data-sd-id="149">
+          <div class="bg-navy-800/50 rounded-lg p-4 border border-navy-600/30 flex items-start gap-3" data-sd-id="150">
+            <iconify-icon icon="lucide:info" class="text-content-muted text-lg flex-shrink-0 mt-0.5"></iconify-icon>
+            <p class="text-xs text-content-muted leading-relaxed" data-sd-id="151">
+              CreditWise is an academic decision-support prototype. Predictions are estimates based on historical data and should not be treated as financial advice or autonomous lending decisions. SHAP explanations describe model behavior, not real-world causation.
+            </p>
+          </div>
+        </footer>
+
+      </div>
+    </main>
+  </div>
+
+</body></html>

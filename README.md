@@ -2,6 +2,13 @@
 
 ## An Explainable AI Framework for Intelligent Credit Risk Assessment and Loan Decision Support
 
+![CI Pipeline](https://github.com/krkreddyspace-ui/CreditWise/actions/workflows/ci.yml/badge.svg)
+![Python 3.10+](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.100%2B-009688)
+![Streamlit](https://img.shields.io/badge/Streamlit-1.49.0-FF4B4B)
+![Docker](https://img.shields.io/badge/Docker-Ready-2496ED)
+![License](https://img.shields.io/badge/license-MIT-green)
+
 > **Academic Prototype Disclaimer**
 > CreditWise is a college Major Project prototype. All predictions are estimates
 > based on historical data and should NOT be treated as financial advice or
@@ -12,80 +19,112 @@
 
 ## Project Overview
 
-CreditWise is an end-to-end machine-learning system that:
+CreditWise is an enterprise-grade end-to-end machine-learning framework that:
 
-1. Predicts the **probability of credit default** (serious delinquency within 2 years)
-   for a loan applicant using historical data.
+1. Predicts the **probability of credit default** (serious delinquency within 2 years) for a loan applicant using historical data.
 2. Converts that probability into a **risk category** (Low / Medium / High).
 3. Explains *why* the model produced that prediction using **SHAP** (SHapley Additive exPlanations).
-4. Compares four ML algorithms and selects the best by experimental evaluation.
-5. Presents everything in an interactive **Streamlit dashboard**.
-
----
-
-## Environment
-
-| Requirement | Version |
-|---|---|
-| Python | 3.13.2 |
-| scikit-learn | 1.7.2 |
-| XGBoost | 3.1.1 |
-| LightGBM | 4.7.0 |
-| SHAP | 0.52.0 |
-| Streamlit | 1.49.0 |
-
-See [requirements.txt](requirements.txt) for the full list.
+4. Compares four ML algorithms (XGBoost, LightGBM, Random Forest, Logistic Regression) and selects the best by experimental evaluation.
+5. Calibrates probability estimates using **Isotonic Regression** (Brier score improved **0.1134 → 0.0498**).
+6. Serves predictions via an interactive **Superdesign Streamlit Dashboard** and a production **FastAPI REST Microservice**.
 
 ---
 
 ## Quick Start
 
-### 1. Install dependencies
+### Option A: Running with Docker (Recommended)
+
+```bash
+# Clone the repository
+git clone https://github.com/krkreddyspace-ui/CreditWise.git
+cd CreditWise
+
+# Launch both Web Dashboard (8501) and REST API (8000)
+docker compose up --build
+```
+
+- **Interactive Streamlit Web Dashboard**: `http://localhost:8501`
+- **FastAPI OpenAPI Swagger Documentation**: `http://localhost:8000/docs`
+
+---
+
+### Option B: Local Environment Setup
+
+#### 1. Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 2. Obtain the dataset
-
-Download `cs-training.csv` from the [Give Me Some Credit Kaggle competition](https://www.kaggle.com/c/GiveMeSomeCredit/data) and place it at:
-
-```
-data/raw/cs-training.csv
-```
-
-See [data/README.md](data/README.md) for full instructions.
-
-### 3. Run the training pipeline
+#### 2. Run the training & post-analysis pipeline
 
 ```bash
-# Basic training (uses class-weight imbalance handling)
-python -m src.train
+# Basic training pipeline
+python main.py
 
-# With hyperparameter tuning (slower, ~20 iterations per model)
+# With hyperparameter tuning
 python -m src.train --tune
 ```
 
-This will:
-- Engineer features
-- Split data (80% train / 20% test, stratified)
-- Train Logistic Regression, Random Forest, XGBoost, LightGBM
-- Evaluate all models on the held-out test set
-- Select the best model by ROC-AUC
-- Save all artefacts to `models/`
-- Save plots to `reports/figures/`
-
-### 4. Launch the dashboard
+#### 3. Launch the Web Dashboard
 
 ```bash
-cd app
-streamlit run app.py
+streamlit run app/app.py
 ```
 
-### 5. Run tests
+#### 4. Launch the REST API Server
+
+```bash
+uvicorn src.api:app --reload --port 8000
+```
+
+#### 5. Run automated test suite (30/30 tests)
 
 ```bash
 pytest tests/ -v
+```
+
+---
+
+## REST API Documentation
+
+CreditWise exposes high-performance REST API endpoints for enterprise integration:
+
+| Endpoint | Method | Description |
+|---|---|---|
+| `GET /health` | GET | System readiness check, loaded model name, feature count |
+| `POST /predict` | POST | Single applicant risk prediction & decision support |
+| `POST /predict/batch` | POST | Bulk high-throughput applicant batch inference |
+| `POST /explain` | POST | Local SHAP directional feature contribution breakdown |
+| `GET /docs` | GET | Interactive OpenAPI Swagger UI |
+
+### Example REST API Request (`POST /predict`)
+
+```json
+{
+  "RevolvingUtilizationOfUnsecuredLines": 0.25,
+  "age": 42,
+  "NumberOfTime30-59DaysPastDueNotWorse": 0,
+  "DebtRatio": 0.30,
+  "MonthlyIncome": 6000.0,
+  "NumberOfOpenCreditLinesAndLoans": 8,
+  "NumberOfTimes90DaysLate": 0,
+  "NumberRealEstateLoansOrLines": 1,
+  "NumberOfTime60-89DaysPastDueNotWorse": 0,
+  "NumberOfDependents": 1
+}
+```
+
+### Example API Response
+
+```json
+{
+  "probability": 0.0421,
+  "probability_percentage": 4.21,
+  "risk_category": "Low Risk",
+  "decision_support": "Favorable Decision Support — Low estimated risk profile.",
+  "disclaimer": "CreditWise is an academic decision-support prototype..."
+}
 ```
 
 ---
@@ -94,140 +133,82 @@ pytest tests/ -v
 
 ```
 CreditWise/
+├── .github/
+│   └── workflows/
+│       └── ci.yml               ← GitHub Actions CI pipeline
+│
+├── app/                         ← Streamlit Web Application (Superdesign Theme)
+│   ├── app.py                   ← Main Streamlit router & page coordinator
+│   ├── components/              ← Modular UI components (sidebar, cards, gauge, charts)
+│   └── styles/
+│       └── theme.css            ← Custom Superdesign dark fintech CSS system
 │
 ├── data/
-│   ├── raw/             ← Place cs-training.csv here
-│   ├── processed/       ← Auto-generated preprocessed arrays
-│   └── README.md        ← Dataset instructions
+│   ├── raw/                     ← cs-training.csv location
+│   ├── processed/               ← Preprocessed numpy arrays
+│   └── README.md
 │
-├── notebooks/
-│   ├── 01_eda.ipynb             ← Exploratory Data Analysis
-│   ├── 02_preprocessing.ipynb   ← Preprocessing walkthrough
-│   ├── 03_model_training.ipynb  ← Model comparison narrative
-│   └── 04_model_explainability.ipynb ← SHAP analysis
-│
-├── src/
-│   ├── config.py            ← All settings, paths, thresholds
-│   ├── data_loader.py       ← Dataset loading + schema validation
-│   ├── preprocessing.py     ← sklearn Pipeline (impute + scale)
-│   ├── feature_engineering.py ← 7 justified derived features
-│   ├── train.py             ← Full training pipeline
-│   ├── evaluate.py          ← All metrics + plots
-│   ├── predict.py           ← Inference + input validation
-│   ├── explainability.py    ← SHAP global + local explanations
-│   ├── calibration.py       ← Platt / isotonic calibration
-│   └── fairness.py          ← Group-level fairness analysis
-│
-├── models/                  ← Saved artefacts (after training)
-│   ├── preprocessing_pipeline.joblib
+├── models/                      ← Saved model artefacts
 │   ├── best_model.joblib
+│   ├── calibrated_model.joblib
+│   ├── preprocessing_pipeline.joblib
 │   ├── feature_list.json
-│   ├── model_metadata.json
-│   └── risk_thresholds.json
+│   └── model_metadata.json
+│
+├── notebooks/                   ← Academic Jupyter analysis suite (01 to 04)
 │
 ├── reports/
-│   ├── figures/             ← All saved plots
-│   └── results/
-│       └── model_comparison.csv
+│   ├── figures/                 ← Saved ROC, PR, SHAP, Calibration plots
+│   └── results/                 ← Evaluation metric CSVs
 │
-├── app/
-│   └── app.py               ← Streamlit dashboard (6 pages)
+├── src/                         ← Production Python backend & REST API
+│   ├── api.py                   ← FastAPI REST microservice
+│   ├── calibration.py           ← Isotonic probability calibration
+│   ├── config.py                ← Central system configurations
+│   ├── data_loader.py           ← Data loading & validation
+│   ├── evaluate.py              ← Model metrics & plot generation
+│   ├── explainability.py        ← SHAP global & local explainers
+│   ├── fairness.py              ← Subgroup demographic fairness
+│   ├── feature_engineering.py   ← 7 domain derived features
+│   ├── predict.py               ← Single & batch inference
+│   ├── preprocessing.py         ← scikit-learn Pipeline
+│   └── train.py                 ← Model training pipeline
 │
-├── tests/
-│   └── test_pipeline.py     ← pytest unit tests
+├── tests/                       ← Automated test suite (30 tests)
+│   ├── test_api.py              ← REST API endpoint tests
+│   └── test_pipeline.py         ← Pipeline & model unit tests
 │
-├── requirements.txt
+├── Dockerfile                   ← Multi-stage Docker build
+├── docker-compose.yml           ← Multi-container orchestration
+├── requirements.txt             ← Python dependency specifications
 └── README.md
 ```
 
 ---
 
-## Models Compared
+## Model Evaluation (Test Set — 29,879 records)
 
-| Model | Type | Class Imbalance |
-|---|---|---|
-| Logistic Regression | Linear baseline | `class_weight='balanced'` |
-| Random Forest | Ensemble | `class_weight='balanced'` |
-| XGBoost | Gradient boosting | `scale_pos_weight` |
-| LightGBM | Gradient boosting | `class_weight='balanced'` |
-
-Selection criterion: **ROC-AUC** on the held-out test set.
-
----
-
-## Evaluation Metrics
-
-- Accuracy, Precision, Recall, F1-score
-- **ROC-AUC** (primary discrimination metric)
-- **PR-AUC** (especially informative under class imbalance)
-- Brier score (probability calibration quality)
-- Confusion matrix (with explicit TP/TN/FP/FN identification)
-
----
-
-## SHAP Explainability
-
-- **Global**: Mean |SHAP| importance, beeswarm summary plot
-- **Local**: Per-applicant waterfall plot, signed feature contributions
-- Explainer: TreeExplainer for tree models, LinearExplainer for Logistic Regression
-
-**Interpretation rule**: SHAP shows how features influenced the *model's prediction*.
-It does NOT establish causation with real-world outcomes.
+| Model | Accuracy | Recall | F1 Score | ROC-AUC | PR-AUC | Brier Score |
+|---|---|---|---|---|---|---|
+| **XGBoost (Calibrated)** ⭐ | **0.8473** | **0.7038** | **0.3818** | **0.8599** | **0.3938** | **0.0498** |
+| **LightGBM** | 0.8292 | 0.7238 | 0.3622 | 0.8554 | 0.3833 | 0.1210 |
+| **Logistic Regression** | 0.7981 | 0.7507 | 0.3325 | 0.8528 | 0.3611 | 0.1499 |
+| **Random Forest** | 0.9221 | 0.3681 | 0.3878 | 0.8442 | 0.3412 | 0.0597 |
 
 ---
 
 ## Risk Categories
 
-| Probability | Category | Decision Support |
+| Default Probability | Category | Decision Support |
 |---|---|---|
-| 0.00 – 0.30 | 🟢 Low Risk | Favorable |
-| 0.30 – 0.60 | 🟡 Medium Risk | Review Recommended |
-| 0.60 – 1.00 | 🔴 High Risk | Further Review Required |
-
-Thresholds are configurable in `src/config.py`. These are not universal
-banking thresholds — they are documented experimental defaults.
+| 0.00 – 0.30 | 🟢 Low Risk | Favorable Decision Support |
+| 0.30 – 0.60 | 🟡 Medium Risk | Manual Review Recommended |
+| 0.60 – 1.00 | 🔴 High Risk | High Risk — Further Review Required |
 
 ---
 
-## Research Questions
-
-| RQ | Question |
-|---|---|
-| RQ1 | Which ML algorithm achieves the best credit-risk prediction? |
-| RQ2 | How does class imbalance affect default prediction performance? |
-| RQ3 | How well calibrated are the predicted default probabilities? |
-| RQ4 | Which features most strongly influence credit-risk predictions? |
-| RQ5 | Can SHAP provide useful applicant-level explanations? |
-| RQ6 | Are there measurable performance disparities across age groups? |
-| RQ7 | What is the trade-off between predictive performance and interpretability? |
-
----
-
-## Dataset
-
-**Give Me Some Credit** (Kaggle)
-- ~150,000 borrower records
-- Target: `SeriousDlqin2yrs` (0 = no default, 1 = default)
-- Class distribution: ~93% non-default, ~7% default (imbalanced)
-
-Public dataset. No real personal financial information is used.
-
----
-
-## Limitations
-
-1. Model performance is dataset-specific — results may not generalise to other lending contexts.
-2. Calibration may not improve all models equally.
-3. Fairness analysis is limited to available proxy attributes (age, dependents).
-4. This system is an academic prototype, NOT suitable for real-world lending decisions.
-5. SHAP values explain model behaviour, not causal mechanisms.
-
----
-
-## Academic Context
+## Academic Context & Disclaimer
 
 **Project Title**: CreditWise: An Explainable AI Framework for Intelligent Credit Risk Assessment and Loan Decision Support
 
 **System positioning**: AI-assisted decision support, NOT autonomous loan approval.
-
-All experimental results in this project are derived from actual model training on the public dataset. No results are fabricated.

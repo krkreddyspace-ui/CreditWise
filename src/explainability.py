@@ -30,7 +30,7 @@ Explainer selection
 import json
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import matplotlib
 matplotlib.use("Agg")   # non-interactive backend for server/script use
@@ -77,6 +77,13 @@ def build_explainer(
     shap.Explainer (TreeExplainer, LinearExplainer, or KernelExplainer)
     """
     model_type = type(model).__name__
+
+    if model_type == "CalibratedClassifierCV":
+        if hasattr(model, "estimator") and model.estimator is not None:
+            model = model.estimator
+        elif hasattr(model, "calibrated_classifiers_") and len(model.calibrated_classifiers_) > 0:
+            model = model.calibrated_classifiers_[0].estimator
+        model_type = type(model).__name__
 
     if model_type in TREE_MODEL_TYPES:
         logger.info("Using TreeExplainer for %s", model_name or model_type)
@@ -261,56 +268,97 @@ def plot_shap_bar_importance(
 # ---------------------------------------------------------------------------
 
 def explain_single(
-    explainer: shap.Explainer,
-    x_single: np.ndarray,
-    feature_names: List[str],
+    explainer_or_model: Any,
+    x_single_or_input: Any,
+    feature_names_or_pipeline: Any = None,
+    feature_names: Optional[List[str]] = None,
+    background_sample: Optional[np.ndarray] = None,
     top_n: int = 10,
 ) -> Dict:
     """Compute SHAP explanation for one applicant.
 
-    Parameters
-    ----------
-    explainer : shap.Explainer
-    x_single : np.ndarray
-        Single-row feature array (shape: [1, n_features]).
-    feature_names : list of str
-    top_n : int
-        Number of top contributors to return.
+    Supports both:
+    1. Low-level:  explain_single(explainer, x_single, feature_names)
+    2. High-level: explain_single(model, raw_input_dict, pipeline, feature_names, background_sample)
 
     Returns
     -------
     dict with keys:
         - 'base_value'    : float (model expected value / intercept)
-        - 'prediction'    : float (predicted probability for this sample)
-        - 'contributions' : list of dicts [{feature, value, shap_value}, ...]
-                            sorted by |shap_value| descending
-        - 'top_increasing': features most strongly pushing probability UP
-        - 'top_decreasing': features most strongly pushing probability DOWN
+        - 'prediction'    : float (predicted probability / log-odds for this sample)
+        - 'contributions' : list of dicts [{feature, feature_value, shap_value}, ...]
+        - 'shap_values'   : dict mapping feature_name -> shap_value
+        - 'top_increasing': features most strongly pushing risk UP
+        - 'top_decreasing': features most strongly pushing risk DOWN
     """
+    from src.feature_engineering import engineer_features
+    import pandas as pd
+
+    # High-level invocation: model, raw_dict, pipeline, feature_names, background_sample
+    if isinstance(x_single_or_input, dict):
+        raw_dict = x_single_or_input
+        pipeline = feature_names_or_pipeline
+        target_features = feature_names or []
+
+        # Transform single input row
+        df_single = pd.DataFrame([raw_dict])
+        df_eng = engineer_features(df_single)
+        
+        # Ensure column ordering matching pipeline expectations
+        if target_features:
+            df_eng = df_eng[target_features]
+
+        x_single = pipeline.transform(df_eng) if pipeline is not None else df_eng.values
+        if hasattr(x_single, "toarray"):
+            x_single = x_single.toarray()
+
+        # Extract base estimator if model is wrapped in CalibratedClassifierCV
+        model = explainer_or_model
+        if type(model).__name__ == "CalibratedClassifierCV":
+            if hasattr(model, "estimator") and model.estimator is not None:
+                model = model.estimator
+            elif hasattr(model, "calibrated_classifiers_") and len(model.calibrated_classifiers_) > 0:
+                model = model.calibrated_classifiers_[0].estimator
+
+        bg = background_sample if background_sample is not None else x_single
+        explainer = build_explainer(model, bg, target_features)
+    else:
+        explainer = explainer_or_model
+        x_single = x_single_or_input
+        target_features = feature_names_or_pipeline or []
+
+    # Compute SHAP values for single sample
     shap_exp = explainer(x_single)
 
-    # Handle multi-class output
-    if shap_exp.values.ndim == 3:
+    # Handle multi-class / 3D output
+    if hasattr(shap_exp, "values") and shap_exp.values.ndim == 3:
         sv = shap_exp.values[0, :, 1]
         bv = float(shap_exp.base_values[0, 1]) if shap_exp.base_values.ndim > 1 \
             else float(shap_exp.base_values[0])
-    else:
+    elif hasattr(shap_exp, "values"):
         sv = shap_exp.values[0]
         bv = float(shap_exp.base_values[0]) if np.ndim(shap_exp.base_values) > 0 \
             else float(shap_exp.base_values)
+    else:
+        sv = shap_exp[0]
+        bv = 0.0
 
     prediction = float(bv + sv.sum())
     prediction = float(np.clip(prediction, 0.0, 1.0))
 
+    feat_names = target_features if target_features else [f"feature_{i}" for i in range(len(sv))]
+
     contributions = [
         {
-            "feature": feature_names[i],
+            "feature": feat_names[i],
             "feature_value": float(x_single[0, i]) if x_single.ndim == 2 else float(x_single[i]),
             "shap_value": float(sv[i]),
         }
-        for i in range(len(feature_names))
+        for i in range(min(len(feat_names), len(sv)))
     ]
     contributions.sort(key=lambda d: abs(d["shap_value"]), reverse=True)
+
+    shap_values_dict = {c["feature"]: c["shap_value"] for c in contributions}
 
     top_increasing = [c for c in contributions if c["shap_value"] > 0][:top_n]
     top_decreasing = [c for c in contributions if c["shap_value"] < 0][:top_n]
@@ -319,6 +367,7 @@ def explain_single(
         "base_value": bv,
         "prediction": prediction,
         "contributions": contributions[:top_n],
+        "shap_values": shap_values_dict,
         "top_increasing": top_increasing,
         "top_decreasing": top_decreasing,
     }

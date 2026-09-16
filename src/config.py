@@ -41,6 +41,7 @@ FEATURE_LIST_FILE = MODELS_DIR / "feature_list.json"
 MODEL_METADATA_FILE = MODELS_DIR / "model_metadata.json"
 RISK_THRESHOLDS_FILE = MODELS_DIR / "risk_thresholds.json"
 MODEL_COMPARISON_FILE = RESULTS_DIR / "model_comparison.csv"
+SHAP_BACKGROUND_FILE = MODELS_DIR / "shap_background.joblib"
 
 # ---------------------------------------------------------------------------
 # Reproducibility

@@ -1,0 +1,318 @@
+<!DOCTYPE html><html lang="en" class="dark"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CreditWise What-If Simulator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            navy: {
+              900: '#0B1220',
+              800: '#111827',
+              700: '#172033',
+              600: '#1F2937'
+            },
+            primary: '#2563EB',
+            cyan: '#06B6D4',
+            success: '#10B981',
+            warning: '#F59E0B',
+            danger: '#EF4444',
+            content: {
+              primary: '#F8FAFC',
+              secondary: '#94A3B8',
+              muted: '#64748B'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #0B1220;
+      color: #F8FAFC;
+    }
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0B1220;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1F2937;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #374151;
+    }
+    
+    /* Custom Slider Styling */
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 100%;
+      background: transparent;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 16px;
+      width: 16px;
+      border-radius: 50%;
+      background: #2563EB;
+      cursor: pointer;
+      margin-top: -6px;
+      box-shadow: 0 0 10px rgba(37,99,235,0.5);
+    }
+    input[type=range]::-webkit-slider-runnable-track {
+      width: 100%;
+      height: 4px;
+      cursor: pointer;
+      background: #1F2937;
+      border-radius: 2px;
+    }
+    input[type=range]:focus {
+      outline: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="flex h-screen overflow-hidden bg-navy-900" data-sd-id="1">
+    
+    <!-- Sidebar -->
+    <aside class="w-64 flex-shrink-0 border-r border-navy-600/50 bg-navy-900 flex flex-col" data-sd-id="2">
+      <div class="p-6" data-sd-id="3">
+        <div class="flex items-center gap-3" data-sd-id="4">
+          <div class="w-8 h-8 rounded bg-gradient-to-br from-primary to-cyan flex items-center justify-center text-white font-bold" data-sd-id="5">
+            <iconify-icon icon="lucide:shield" class="text-xl"></iconify-icon>
+          </div>
+          <h1 class="text-xl font-bold tracking-tight" data-sd-id="6">CreditWise</h1>
+        </div>
+        <p class="text-[10px] font-semibold text-primary uppercase tracking-wider mt-2" data-sd-id="7">AI Credit Intelligence</p>
+      </div>
+
+      <nav class="flex-1 px-4 space-y-1 overflow-y-auto mt-4" data-sd-id="8">
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-content-secondary hover:bg-navy-800 hover:text-content-primary font-medium text-sm transition-colors group" data-sd-id="9">
+          <iconify-icon icon="lucide:layout-dashboard" class="text-lg group-hover:text-primary transition-colors"></iconify-icon>
+          Dashboard
+        </a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-content-secondary hover:bg-navy-800 hover:text-content-primary font-medium text-sm transition-colors group" data-sd-id="10">
+          <iconify-icon icon="lucide:shield-check" class="text-lg group-hover:text-primary transition-colors"></iconify-icon>
+          Risk Assessment
+        </a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-content-secondary hover:bg-navy-800 hover:text-content-primary font-medium text-sm transition-colors group" data-sd-id="11">
+          <iconify-icon icon="lucide:brain-circuit" class="text-lg group-hover:text-primary transition-colors"></iconify-icon>
+          Model Intelligence
+        </a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-content-secondary hover:bg-navy-800 hover:text-content-primary font-medium text-sm transition-colors group" data-sd-id="12">
+          <iconify-icon icon="lucide:sparkles" class="text-lg group-hover:text-primary transition-colors"></iconify-icon>
+          Explainability
+        </a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-primary/10 text-primary font-medium text-sm border-l-2 border-primary relative left-[-16px] pl-6 transition-colors" data-sd-id="13">
+          <iconify-icon icon="lucide:sliders-horizontal" class="text-lg"></iconify-icon>
+          What-If Simulator
+        </a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-content-secondary hover:bg-navy-800 hover:text-content-primary font-medium text-sm transition-colors group" data-sd-id="14">
+          <iconify-icon icon="lucide:book-open" class="text-lg group-hover:text-primary transition-colors"></iconify-icon>
+          Methodology
+        </a>
+      </nav>
+
+      <div class="p-4 border-t border-navy-600/50 space-y-4" data-sd-id="15">
+        <div class="space-y-2" data-sd-id="16">
+          <div class="flex items-center justify-between text-xs" data-sd-id="17">
+            <span class="text-content-secondary" data-sd-id="18">Model Status</span>
+            <div class="flex items-center gap-1.5 text-success" data-sd-id="19">
+              <span class="w-2 h-2 rounded-full bg-success" data-sd-id="20"></span>
+              <span class="font-medium" data-sd-id="21">Ready</span>
+            </div>
+          </div>
+          <div class="flex items-center justify-between text-xs" data-sd-id="22">
+            <span class="text-content-secondary" data-sd-id="23">Dataset</span>
+            <div class="flex items-center gap-1.5 text-success" data-sd-id="24">
+              <span class="w-2 h-2 rounded-full bg-success" data-sd-id="25"></span>
+              <span class="font-medium" data-sd-id="26">Loaded</span>
+            </div>
+          </div>
+        </div>
+        <div class="px-3 py-2 rounded bg-navy-800 border border-navy-600/50 text-center" data-sd-id="27">
+          <span class="text-[10px] text-content-muted font-medium uppercase tracking-wider" data-sd-id="28">Academic Prototype</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col min-w-0 overflow-hidden relative" data-sd-id="29">
+      
+      <!-- Header -->
+      <header class="h-20 flex-shrink-0 flex items-center justify-between px-8 border-b border-navy-600/50 bg-navy-900/90 backdrop-blur z-10 sticky top-0" data-sd-id="30">
+        <div data-sd-id="31">
+          <h2 class="text-xl font-bold tracking-tight" data-sd-id="32">What-If Simulator</h2>
+          <p class="text-sm text-content-secondary mt-0.5" data-sd-id="33">Explore how changes in applicant information affect model predictions</p>
+        </div>
+        <div class="flex items-center gap-6 text-sm" data-sd-id="34">
+          <div class="flex items-center gap-2" data-sd-id="35">
+            <span class="w-2 h-2 rounded-full bg-success animate-pulse" data-sd-id="36"></span>
+            <span class="text-content-secondary" data-sd-id="37">Live Prediction Active</span>
+          </div>
+          <button class="w-8 h-8 flex items-center justify-center rounded hover:bg-navy-800 text-content-secondary hover:text-content-primary transition-colors" data-sd-id="38">
+            <iconify-icon icon="lucide:refresh-cw" class="text-lg"></iconify-icon>
+          </button>
+        </div>
+      </header>
+
+      <!-- Scrollable Content Area -->
+      <div class="flex-1 overflow-y-auto p-8" data-sd-id="39">
+        
+        <div class="max-w-7xl mx-auto grid grid-cols-1 xl:grid-cols-12 gap-8" data-sd-id="40">
+          
+          <!-- Left Column: Interactive Input Form -->
+          <div class="xl:col-span-7 space-y-6" data-sd-id="41">
+            
+            <section class="bg-navy-700 rounded-xl p-6 border border-navy-600/50" data-sd-id="42">
+               <h3 class="text-lg font-semibold text-white mb-6 flex items-center gap-2" data-sd-id="43">
+                  <iconify-icon icon="lucide:sliders" class="text-primary"></iconify-icon>
+                  Modify Applicant Profile
+               </h3>
+
+               <div class="space-y-8" data-sd-id="44">
+                  <!-- Sliders -->
+                  <div class="space-y-4" data-sd-id="45">
+                      <div data-sd-id="46">
+                          <div class="flex justify-between text-sm font-medium mb-2" data-sd-id="47">
+                              <label class="text-content-secondary" data-sd-id="48">Revolving Utilization</label>
+                              <span class="text-white" data-sd-id="49">45%</span>
+                          </div>
+                          <input type="range" min="0" max="100" value="45" data-sd-id="50">
+                      </div>
+                      <div data-sd-id="51">
+                           <div class="flex justify-between text-sm font-medium mb-2" data-sd-id="52">
+                              <label class="text-content-secondary" data-sd-id="53">Debt Ratio</label>
+                              <span class="text-white" data-sd-id="54">30%</span>
+                          </div>
+                          <input type="range" min="0" max="100" value="30" data-sd-id="55">
+                      </div>
+                  </div>
+
+                  <!-- Other Inputs -->
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4" data-sd-id="56">
+                      <div class="space-y-1" data-sd-id="57">
+                          <label class="text-sm font-medium text-content-secondary" data-sd-id="58">Monthly Income ($)</label>
+                          <input type="number" value="7000" class="w-full bg-navy-800 border border-navy-600 rounded-lg py-2 px-3 text-white focus:outline-none focus:border-primary" data-sd-id="59">
+                      </div>
+                      <div class="space-y-1" data-sd-id="60">
+                          <label class="text-sm font-medium text-content-secondary" data-sd-id="61">Age</label>
+                          <input type="number" value="42" class="w-full bg-navy-800 border border-navy-600 rounded-lg py-2 px-3 text-white focus:outline-none focus:border-primary" data-sd-id="62">
+                      </div>
+                      <div class="space-y-1" data-sd-id="63">
+                          <label class="text-sm font-medium text-content-secondary" data-sd-id="64">30-59 Days Past Due</label>
+                          <input type="number" value="0" class="w-full bg-navy-800 border border-navy-600 rounded-lg py-2 px-3 text-white focus:outline-none focus:border-primary" data-sd-id="65">
+                      </div>
+                      <div class="space-y-1" data-sd-id="66">
+                          <label class="text-sm font-medium text-content-secondary" data-sd-id="67">60-89 Days Past Due</label>
+                          <input type="number" value="0" class="w-full bg-navy-800 border border-navy-600 rounded-lg py-2 px-3 text-white focus:outline-none focus:border-primary" data-sd-id="68">
+                      </div>
+                      <div class="space-y-1" data-sd-id="69">
+                          <label class="text-sm font-medium text-content-secondary" data-sd-id="70">Open Credit Lines</label>
+                          <input type="number" value="8" class="w-full bg-navy-800 border border-navy-600 rounded-lg py-2 px-3 text-white focus:outline-none focus:border-primary" data-sd-id="71">
+                      </div>
+                      <div class="space-y-1 flex items-center justify-between bg-navy-800 border border-danger/30 rounded-lg px-4 py-2 mt-5" data-sd-id="72">
+                          <label class="text-sm font-medium text-danger flex items-center gap-2" data-sd-id="73">
+                              <iconify-icon icon="lucide:alert-triangle"></iconify-icon>
+                              90+ Days Late
+                          </label>
+                          <input type="checkbox" class="w-4 h-4 rounded bg-navy-900 border-navy-600 text-primary focus:ring-primary" checked="" data-sd-id="74">
+                      </div>
+                  </div>
+
+                  <div class="flex gap-3 pt-2" data-sd-id="75">
+                       <button class="px-4 py-2 border border-navy-600 hover:bg-navy-800 text-content-primary rounded text-sm transition-colors" data-sd-id="76">Reset to Original</button>
+                  </div>
+               </div>
+            </section>
+
+          </div>
+
+          <!-- Right Column: Live Prediction Panel -->
+          <div class="xl:col-span-5" data-sd-id="77">
+            <div class="bg-navy-700 rounded-xl border border-navy-600/50 overflow-hidden sticky top-8" data-sd-id="78">
+              
+              <div class="p-6 border-b border-navy-600/50" data-sd-id="79">
+                 <h3 class="text-lg font-semibold text-white mb-6" data-sd-id="80">Live Prediction Comparison</h3>
+                 
+                 <div class="grid grid-cols-2 gap-4 mb-8" data-sd-id="81">
+                    <div class="bg-navy-800 p-4 rounded-lg border border-navy-600" data-sd-id="82">
+                        <p class="text-xs text-content-secondary uppercase tracking-wider mb-1" data-sd-id="83">Current Risk</p>
+                        <p class="text-3xl font-bold text-white mb-2" data-sd-id="84">32.4<span class="text-lg text-content-muted" data-sd-id="85">%</span></p>
+                        <span class="inline-block px-2 py-0.5 rounded text-xs font-semibold bg-warning/20 text-warning border border-warning/30" data-sd-id="86">MEDIUM</span>
+                    </div>
+                    <div class="bg-primary/5 p-4 rounded-lg border border-primary/30 relative overflow-hidden" data-sd-id="87">
+                        <div class="absolute top-0 right-0 p-2" data-sd-id="88">
+                           <span class="flex h-2 w-2" data-sd-id="89">
+                              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" data-sd-id="90"></span>
+                              <span class="relative inline-flex rounded-full h-2 w-2 bg-primary" data-sd-id="91"></span>
+                           </span>
+                        </div>
+                        <p class="text-xs text-content-secondary uppercase tracking-wider mb-1" data-sd-id="92">Modified Risk</p>
+                        <p class="text-3xl font-bold text-success mb-2" data-sd-id="93">21.8<span class="text-lg text-content-muted" data-sd-id="94">%</span></p>
+                        <span class="inline-block px-2 py-0.5 rounded text-xs font-semibold bg-success/20 text-success border border-success/30" data-sd-id="95">LOW</span>
+                    </div>
+                 </div>
+
+                 <div class="flex items-center justify-between bg-navy-800/50 p-4 rounded-lg" data-sd-id="96">
+                     <div data-sd-id="97">
+                         <p class="text-sm text-content-secondary mb-1" data-sd-id="98">Change Indicator</p>
+                         <div class="flex items-center gap-2 text-success font-semibold text-lg" data-sd-id="99">
+                             <iconify-icon icon="lucide:trending-down"></iconify-icon>
+                             -10.6 pp
+                         </div>
+                     </div>
+                     <div class="text-right" data-sd-id="100">
+                         <p class="text-sm text-content-secondary mb-1" data-sd-id="101">Risk Category Shift</p>
+                         <div class="flex items-center gap-2 text-sm font-medium" data-sd-id="102">
+                             <span class="text-warning" data-sd-id="103">Medium</span>
+                             <iconify-icon icon="lucide:arrow-right" class="text-content-muted"></iconify-icon>
+                             <span class="text-success" data-sd-id="104">Low</span>
+                         </div>
+                     </div>
+                 </div>
+              </div>
+
+              <div class="p-6 bg-navy-800/30" data-sd-id="105">
+                  <p class="text-sm text-content-primary font-medium mb-2" data-sd-id="106">
+                      <iconify-icon icon="lucide:info" class="text-primary mr-1"></iconify-icon>
+                      Simulator Insight
+                  </p>
+                  <p class="text-xs text-content-secondary leading-relaxed" data-sd-id="107">
+                      Lowering the revolving utilization to 45% and unchecking the 90+ days late indicator significantly reduces the estimated default probability, pushing the assessment from Medium to Low risk.
+                  </p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Academic Disclaimer Footer -->
+        <footer class="pt-8 pb-4" data-sd-id="108">
+          <div class="bg-navy-800/50 rounded-lg p-4 border border-navy-600/30 flex items-start gap-3" data-sd-id="109">
+            <iconify-icon icon="lucide:alert-circle" class="text-content-muted text-lg flex-shrink-0 mt-0.5"></iconify-icon>
+            <p class="text-xs text-content-muted leading-relaxed" data-sd-id="110">
+              This simulator shows model sensitivity to changed inputs. It does not guarantee that changing these factors will produce the same outcome in real-world lending or that such changes are practically feasible for the applicant.
+            </p>
+          </div>
+        </footer>
+
+      </div>
+    </main>
+  </div>
+
+</body></html>

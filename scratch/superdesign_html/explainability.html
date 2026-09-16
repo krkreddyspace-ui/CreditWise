@@ -1,0 +1,236 @@
+<!DOCTYPE html><html lang="en" class="dark"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CreditWise Explainability</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            navy: {
+              900: '#0B1220',
+              800: '#111827',
+              700: '#172033',
+              600: '#1F2937'
+            },
+            primary: '#2563EB',
+            cyan: '#06B6D4',
+            success: '#10B981',
+            warning: '#F59E0B',
+            danger: '#EF4444',
+            content: {
+              primary: '#F8FAFC',
+              secondary: '#94A3B8',
+              muted: '#64748B'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #0B1220;
+      color: #F8FAFC;
+    }
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0B1220;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1F2937;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #374151;
+    }
+  </style>
+</head>
+<body>
+  <div class="flex h-screen overflow-hidden bg-navy-900" data-sd-id="1">
+    
+    <!-- Sidebar (Same as Dashboard) -->
+    <aside class="w-64 flex-shrink-0 border-r border-navy-600/50 bg-navy-900 flex flex-col" data-sd-id="2">
+      <div class="p-6" data-sd-id="3">
+        <div class="flex items-center gap-3" data-sd-id="4">
+          <div class="w-8 h-8 rounded bg-gradient-to-br from-primary to-cyan flex items-center justify-center text-white font-bold" data-sd-id="5">
+            <iconify-icon icon="lucide:shield" class="text-xl"></iconify-icon>
+          </div>
+          <h1 class="text-xl font-bold tracking-tight" data-sd-id="6">CreditWise</h1>
+        </div>
+        <p class="text-[10px] font-semibold text-primary uppercase tracking-wider mt-2" data-sd-id="7">AI Credit Intelligence</p>
+      </div>
+
+      <nav class="flex-1 px-4 space-y-1 overflow-y-auto mt-4" data-sd-id="8">
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-content-secondary hover:bg-navy-800 hover:text-content-primary font-medium text-sm transition-colors group" data-sd-id="9">
+          <iconify-icon icon="lucide:layout-dashboard" class="text-lg group-hover:text-primary transition-colors"></iconify-icon>
+          Dashboard
+        </a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-content-secondary hover:bg-navy-800 hover:text-content-primary font-medium text-sm transition-colors group" data-sd-id="10">
+          <iconify-icon icon="lucide:shield-check" class="text-lg group-hover:text-primary transition-colors"></iconify-icon>
+          Risk Assessment
+        </a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-content-secondary hover:bg-navy-800 hover:text-content-primary font-medium text-sm transition-colors group" data-sd-id="11">
+          <iconify-icon icon="lucide:brain-circuit" class="text-lg group-hover:text-primary transition-colors"></iconify-icon>
+          Model Intelligence
+        </a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-primary/10 text-primary font-medium text-sm border-l-2 border-primary relative left-[-16px] pl-6 transition-colors" data-sd-id="12">
+          <iconify-icon icon="lucide:sparkles" class="text-lg"></iconify-icon>
+          Explainability
+        </a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-content-secondary hover:bg-navy-800 hover:text-content-primary font-medium text-sm transition-colors group" data-sd-id="13">
+          <iconify-icon icon="lucide:sliders-horizontal" class="text-lg group-hover:text-primary transition-colors"></iconify-icon>
+          What-If Simulator
+        </a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-content-secondary hover:bg-navy-800 hover:text-content-primary font-medium text-sm transition-colors group" data-sd-id="14">
+          <iconify-icon icon="lucide:book-open" class="text-lg group-hover:text-primary transition-colors"></iconify-icon>
+          Methodology
+        </a>
+      </nav>
+
+      <div class="p-4 border-t border-navy-600/50 space-y-4" data-sd-id="15">
+        <div class="space-y-2" data-sd-id="16">
+          <div class="flex items-center justify-between text-xs" data-sd-id="17">
+            <span class="text-content-secondary" data-sd-id="18">Model Status</span>
+            <div class="flex items-center gap-1.5 text-success" data-sd-id="19">
+              <span class="w-2 h-2 rounded-full bg-success" data-sd-id="20"></span>
+              <span class="font-medium" data-sd-id="21">Ready</span>
+            </div>
+          </div>
+          <div class="flex items-center justify-between text-xs" data-sd-id="22">
+            <span class="text-content-secondary" data-sd-id="23">Dataset</span>
+            <div class="flex items-center gap-1.5 text-success" data-sd-id="24">
+              <span class="w-2 h-2 rounded-full bg-success" data-sd-id="25"></span>
+              <span class="font-medium" data-sd-id="26">Loaded</span>
+            </div>
+          </div>
+        </div>
+        <div class="px-3 py-2 rounded bg-navy-800 border border-navy-600/50 text-center" data-sd-id="27">
+          <span class="text-[10px] text-content-muted font-medium uppercase tracking-wider" data-sd-id="28">Academic Prototype</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col min-w-0 overflow-hidden relative" data-sd-id="29">
+      
+      <!-- Header -->
+      <header class="h-20 flex-shrink-0 flex items-center justify-between px-8 border-b border-navy-600/50 bg-navy-900/90 backdrop-blur z-10 sticky top-0" data-sd-id="30">
+        <div data-sd-id="31">
+          <h2 class="text-xl font-bold tracking-tight" data-sd-id="32">Explainability</h2>
+          <p class="text-sm text-content-secondary mt-0.5" data-sd-id="33">Understand what influenced the model's prediction</p>
+        </div>
+        <div class="flex items-center gap-6 text-sm" data-sd-id="34">
+          <div class="flex items-center gap-2" data-sd-id="35">
+            <span class="w-2 h-2 rounded-full bg-success animate-pulse" data-sd-id="36"></span>
+            <span class="text-content-secondary" data-sd-id="37">Model Ready</span>
+          </div>
+          <button class="w-8 h-8 flex items-center justify-center rounded hover:bg-navy-800 text-content-secondary hover:text-content-primary transition-colors" data-sd-id="38">
+            <iconify-icon icon="lucide:refresh-cw" class="text-lg"></iconify-icon>
+          </button>
+        </div>
+      </header>
+
+      <!-- Scrollable Content Area -->
+      <div class="flex-1 overflow-y-auto p-8" data-sd-id="39">
+        
+        <div class="max-w-7xl mx-auto space-y-8" data-sd-id="40">
+          
+          <!-- Tabs -->
+          <div class="border-b border-navy-600/50" data-sd-id="41">
+            <nav class="-mb-px flex space-x-8" data-sd-id="42">
+              <a href="#" class="border-primary text-white border-b-2 py-4 px-1 text-sm font-medium transition-colors" data-sd-id="43">
+                Global Explanation
+              </a>
+              <a href="#" class="border-transparent text-content-secondary hover:text-white hover:border-navy-600 border-b-2 py-4 px-1 text-sm font-medium transition-colors" data-sd-id="44">
+                Applicant Explanation
+              </a>
+            </nav>
+          </div>
+
+          <!-- Tab Content (Global) -->
+          <div class="space-y-6" data-sd-id="45">
+            <section class="bg-navy-700 rounded-xl p-6 border border-navy-600/50" data-sd-id="46">
+              <div class="flex items-center justify-between mb-4" data-sd-id="47">
+                <div data-sd-id="48">
+                  <h3 class="text-lg font-semibold text-white" data-sd-id="49">Feature Importance</h3>
+                  <p class="text-sm text-content-secondary mt-1" data-sd-id="50">Global importance shows which features generally have the greatest influence on model predictions across the analyzed dataset.</p>
+                </div>
+              </div>
+              
+              <div class="space-y-4" data-sd-id="51">
+                <div class="flex items-center gap-4" data-sd-id="52">
+                  <span class="text-sm font-medium text-white w-48" data-sd-id="53">Revolving Utilization</span>
+                  <div class="flex-1 h-6 bg-navy-800 rounded overflow-hidden" data-sd-id="54">
+                    <div class="h-full bg-primary" style="width: 90%" data-sd-id="55"></div>
+                  </div>
+                  <span class="text-xs text-content-secondary w-12 text-right" data-sd-id="56">0.245</span>
+                </div>
+                <div class="flex items-center gap-4" data-sd-id="57">
+                  <span class="text-sm font-medium text-white w-48" data-sd-id="58">90+ Days Late</span>
+                  <div class="flex-1 h-6 bg-navy-800 rounded overflow-hidden" data-sd-id="59">
+                    <div class="h-full bg-primary" style="width: 75%" data-sd-id="60"></div>
+                  </div>
+                  <span class="text-xs text-content-secondary w-12 text-right" data-sd-id="61">0.180</span>
+                </div>
+                <div class="flex items-center gap-4" data-sd-id="62">
+                  <span class="text-sm font-medium text-white w-48" data-sd-id="63">Debt Ratio</span>
+                  <div class="flex-1 h-6 bg-navy-800 rounded overflow-hidden" data-sd-id="64">
+                    <div class="h-full bg-primary" style="width: 60%" data-sd-id="65"></div>
+                  </div>
+                  <span class="text-xs text-content-secondary w-12 text-right" data-sd-id="66">0.155</span>
+                </div>
+                <div class="flex items-center gap-4" data-sd-id="67">
+                  <span class="text-sm font-medium text-white w-48" data-sd-id="68">Monthly Income</span>
+                  <div class="flex-1 h-6 bg-navy-800 rounded overflow-hidden" data-sd-id="69">
+                    <div class="h-full bg-primary" style="width: 45%" data-sd-id="70"></div>
+                  </div>
+                  <span class="text-xs text-content-secondary w-12 text-right" data-sd-id="71">0.120</span>
+                </div>
+                <div class="flex items-center gap-4" data-sd-id="72">
+                  <span class="text-sm font-medium text-white w-48" data-sd-id="73">Age</span>
+                  <div class="flex-1 h-6 bg-navy-800 rounded overflow-hidden" data-sd-id="74">
+                    <div class="h-full bg-primary" style="width: 30%" data-sd-id="75"></div>
+                  </div>
+                  <span class="text-xs text-content-secondary w-12 text-right" data-sd-id="76">0.085</span>
+                </div>
+                <div class="flex items-center gap-4" data-sd-id="77">
+                  <span class="text-sm font-medium text-white w-48" data-sd-id="78">Open Credit Lines</span>
+                  <div class="flex-1 h-6 bg-navy-800 rounded overflow-hidden" data-sd-id="79">
+                    <div class="h-full bg-primary" style="width: 20%" data-sd-id="80"></div>
+                  </div>
+                  <span class="text-xs text-content-secondary w-12 text-right" data-sd-id="81">0.060</span>
+                </div>
+              </div>
+            </section>
+          </div>
+
+        </div>
+
+        <!-- Academic Disclaimer Footer -->
+        <footer class="pt-8 pb-4" data-sd-id="82">
+          <div class="bg-navy-800/50 rounded-lg p-4 border border-navy-600/30 flex items-start gap-3" data-sd-id="83">
+            <iconify-icon icon="lucide:info" class="text-content-muted text-lg flex-shrink-0 mt-0.5"></iconify-icon>
+            <p class="text-xs text-content-muted leading-relaxed" data-sd-id="84">
+              SHAP values describe how the model used each feature. They do not establish real-world causation.
+            </p>
+          </div>
+        </footer>
+
+      </div>
+    </main>
+  </div>
+
+</body></html>
