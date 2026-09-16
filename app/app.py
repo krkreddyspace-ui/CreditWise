@@ -306,7 +306,7 @@ elif selected_page == "🎯 Risk Assessment":
             # Compute Local SHAP Explanation for the Applicant
             st.markdown("##### 🔍 Local Contributing Factors")
             try:
-                bg_sample = background_df.values if background_df is not None else None
+                bg_sample = background_df.values if hasattr(background_df, "values") else background_df
                 shap_res = explain_single(model, raw_input, pipeline, feature_list, bg_sample)
                 local_shap = shap_res.get("shap_values", {})
                 render_local_shap_explanation(local_shap, raw_input)
