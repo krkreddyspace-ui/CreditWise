@@ -17,7 +17,7 @@ as a decision-support tool and NOT as an autonomous lending decision.
 import json
 import logging
 from pathlib import Path
-from typing import Dict, Tuple
+from typing import Any, Dict, Tuple
 
 import joblib
 import numpy as np
@@ -119,38 +119,53 @@ def _check_file(path: Path) -> None:
 
 def predict_single(
     applicant_data: Dict,
-    use_calibrated: bool = False,
+    pipeline: Any = None,
+    model: Any = None,
+    feature_names: Any = None,
+    risk_thresholds: Any = None,
+    use_calibrated: bool = True,
 ) -> Dict:
     """Predict credit risk for a single applicant.
 
     Parameters
     ----------
     applicant_data : dict
-        Keys are the original Give Me Some Credit feature names.
-        Missing values should be passed as None (they will be median-imputed).
+        Keys are original Give Me Some Credit feature names.
+    pipeline : sklearn.pipeline.Pipeline, optional
+        Preprocessing pipeline. If None, loaded from disk.
+    model : fitted model estimator, optional
+        Trained model. If None, loaded from disk.
+    feature_names : list of str, optional
+        Feature names. If None, loaded from disk.
+    risk_thresholds : dict, optional
+        Risk threshold boundaries.
     use_calibrated : bool
-        Use the calibrated model if available.
+        Use calibrated model if loading from disk.
 
     Returns
     -------
-    dict with keys:
-        - 'default_probability' : float in [0, 1]
-        - 'risk_category'       : 'low' | 'medium' | 'high'
-        - 'risk_label'          : human-readable risk label
-        - 'decision_support'    : decision-support string
-        - 'model_name'          : name of the model used
-        - 'disclaimer'          : academic disclaimer string
+    dict with keys: default_probability, probability, risk_category, risk_label, decision_support
     """
-    artefacts = load_artefacts(use_calibrated=use_calibrated)
-    pipeline = artefacts["pipeline"]
-    model = artefacts["model"]
-    feature_names = artefacts["feature_names"]
-    metadata = artefacts["metadata"]
+    if isinstance(pipeline, bool):
+        use_calibrated = pipeline
+        pipeline = None
+
+    if pipeline is None or model is None or feature_names is None:
+        artefacts = load_artefacts(use_calibrated=use_calibrated)
+        pipeline = artefacts["pipeline"]
+        model = artefacts["model"]
+        feature_names = artefacts["feature_names"]
+        metadata = artefacts.get("metadata", {})
+    else:
+        metadata = {}
+
+    if risk_thresholds is None:
+        risk_thresholds = RISK_THRESHOLDS
 
     # Build a single-row DataFrame from the input dict
     input_df = pd.DataFrame([applicant_data])
 
-    # Apply feature engineering (same steps as training)
+    # Apply feature engineering
     input_df = engineer_features(input_df)
 
     # Select and order features exactly as during training
@@ -158,26 +173,29 @@ def predict_single(
         X = input_df[feature_names]
     except KeyError as e:
         raise ValueError(
-            f"Missing feature in input: {e}\n"
-            f"Required features: {feature_names}"
-        )
+            f"Missing required feature column after feature engineering: {e}"
+        ) from e
 
-    # Preprocess (impute + scale)
-    X_tf = pipeline.transform(X)
+    # Transform features through pipeline
+    X_trans = pipeline.transform(X)
 
-    # Predict probability
-    prob = float(model.predict_proba(X_tf)[0, 1])
-    prob = np.clip(prob, 0.0, 1.0)
+    # Predict default probability (positive class)
+    prob = float(model.predict_proba(X_trans)[0, 1])
+    prob = max(0.0, min(1.0, prob))  # clip to [0, 1]
 
-    # Assign risk category
+    # Assign risk category & decision support
     category = probability_to_risk_category(prob)
+    label = RISK_LABELS.get(category, f"{category.capitalize()} Risk")
+    decision_support = DECISION_SUPPORT_LABELS.get(category, "")
 
     return {
-        "default_probability": round(prob, 4),
+        "default_probability": prob,
+        "probability": prob,
         "risk_category": category,
-        "risk_label": RISK_LABELS[category],
-        "decision_support": DECISION_SUPPORT_LABELS[category],
-        "model_name": metadata.get("best_model_name", "Unknown"),
+        "risk_label": label,
+        "raw_category": category,
+        "decision_support": decision_support,
+        "model_name": metadata.get("best_model_name", type(model).__name__),
         "disclaimer": APP_DISCLAIMER,
     }
 

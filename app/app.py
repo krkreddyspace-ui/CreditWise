@@ -292,9 +292,9 @@ elif selected_page == "🎯 Risk Assessment":
             risk_cat = pred_res["risk_category"]
             prob_pct = prob * 100.0
 
-            if "Low" in risk_cat:
+            if "low" in risk_cat.lower():
                 rec, support = "Favorable Decision Support", "The applicant exhibits a low probability of default within 2 years. Standard processing guidelines apply."
-            elif "Medium" in risk_cat:
+            elif "medium" in risk_cat.lower():
                 rec, support = "Manual Review Recommended", "The applicant exhibits moderate risk indicators. Additional credit assessment or documentation review recommended."
             else:
                 rec, support = "High Risk — Further Review Required", "The applicant exhibits elevated risk factors. Enhanced due diligence required before decision support."
