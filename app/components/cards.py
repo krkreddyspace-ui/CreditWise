@@ -73,23 +73,25 @@ def render_decision_card(prob_pct: float, risk_category: str, recommendation: st
     style = category_colors.get(risk_category.upper(), category_colors["MEDIUM"])
 
     html = textwrap.dedent(f"""
-        <div style="background-color: {style['bg']}; border: 1.5px solid {style['border']}; border-radius: 14px; padding: 1.5rem; margin-top: 1rem;">
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.8rem;">
-                <span style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #94a3b8;">
-                    ESTIMATED DEFAULT PROBABILITY
-                </span>
-                <span class="cw-badge {style['badge']}">
-                    {risk_category} RISK
-                </span>
-            </div>
-            <div style="font-size: 3rem; font-weight: 900; color: {style['text']}; letter-spacing: -0.03em; line-height: 1;">
-                {prob_pct:.1f}%
+        <div style="background-color: {style['bg']}; border: 1.5px solid {style['border']}; border-radius: 14px; padding: 1.35rem 1.5rem; height: 100%; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
+            <div>
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.6rem;">
+                    <span style="font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #94a3b8;">
+                        ESTIMATED DEFAULT PROBABILITY
+                    </span>
+                    <span class="cw-badge {style['badge']}">
+                        {risk_category} RISK
+                    </span>
+                </div>
+                <div style="font-size: 2.85rem; font-weight: 900; color: {style['text']}; letter-spacing: -0.03em; line-height: 1;">
+                    {prob_pct:.1f}%
+                </div>
             </div>
             <div style="margin-top: 1rem; padding-top: 0.8rem; border-top: 1px solid rgba(255,255,255,0.1);">
-                <div style="font-size: 0.95rem; font-weight: 700; color: #f8fafc; margin-bottom: 0.2rem;">
+                <div style="font-size: 0.92rem; font-weight: 700; color: #f8fafc; margin-bottom: 0.2rem;">
                     Decision Support: {recommendation}
                 </div>
-                <div style="font-size: 0.85rem; color: #cbd5e1; line-height: 1.4;">
+                <div style="font-size: 0.82rem; color: #cbd5e1; line-height: 1.4;">
                     {decision_support}
                 </div>
             </div>

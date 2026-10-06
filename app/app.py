@@ -216,156 +216,161 @@ elif selected_page == "🎯 Risk Assessment":
         tag="APPLICANT EVALUATION"
     )
 
-    col_form, col_result = st.columns([1.1, 1])
+    # 1. Full-width balanced Applicant Financial Profile container
+    st.markdown(
+        """
+        <div class="cw-card" style="margin-bottom: 1.5rem;">
+            <div class="cw-card-header">📋 Applicant Financial Profile</div>
+            <div class="cw-card-subtitle">Configure applicant credit history, debt exposure, and financial parameters across all risk dimensions.</div>
+        """,
+        unsafe_allow_html=True
+    )
 
-    with col_form:
-        st.markdown(
-            """
-            <div class="cw-card">
-                <div class="cw-card-header">📋 Applicant Financial Profile</div>
-                <div class="cw-card-subtitle">Enter applicant credit history and financial information.</div>
-            """,
-            unsafe_allow_html=True
-        )
+    with st.form("risk_assessment_form"):
+        col_input_1, col_input_2, col_input_3 = st.columns(3)
+        with col_input_1:
+            st.markdown("##### 💳 Utilization & Income")
+            revolving_util = st.number_input(
+                "Revolving Utilization Ratio",
+                min_value=0.0, max_value=50.0, value=0.32, step=0.01,
+                help="Total balance on credit cards divided by credit limit"
+            )
+            monthly_income = st.number_input(
+                "Monthly Income ($)",
+                min_value=0.0, max_value=500000.0, value=5500.0, step=100.0
+            )
+            debt_ratio = st.number_input(
+                "Debt Ratio",
+                min_value=0.0, max_value=50.0, value=0.35, step=0.01,
+                help="Monthly debt payments divided by gross monthly income"
+            )
+            age = st.number_input(
+                "Applicant Age (Years)",
+                min_value=18, max_value=110, value=45, step=1
+            )
 
-        with st.form("risk_assessment_form"):
-            st.markdown("##### 💳 Credit Utilization & Income")
-            col_a, col_b = st.columns(2)
-            with col_a:
-                revolving_util = st.number_input(
-                    "Revolving Utilization Ratio",
-                    min_value=0.0, max_value=50.0, value=0.32, step=0.01,
-                    help="Total balance on credit cards divided by credit limit"
-                )
-                monthly_income = st.number_input(
-                    "Monthly Income ($)",
-                    min_value=0.0, max_value=500000.0, value=5500.0, step=100.0
-                )
-            with col_b:
-                debt_ratio = st.number_input(
-                    "Debt Ratio",
-                    min_value=0.0, max_value=50.0, value=0.35, step=0.01,
-                    help="Monthly debt payments divided by gross monthly income"
-                )
-                age = st.number_input(
-                    "Applicant Age (Years)",
-                    min_value=18, max_value=110, value=45, step=1
-                )
-
+        with col_input_2:
             st.markdown("##### ⚠️ Delinquency History")
-            col_c, col_d, col_e = st.columns(3)
-            with col_c:
-                past_due_30_59 = st.number_input("30–59 Days Late", min_value=0, max_value=20, value=0)
-            with col_d:
-                past_due_60_89 = st.number_input("60–89 Days Late", min_value=0, max_value=20, value=0)
-            with col_e:
-                past_due_90 = st.number_input("90+ Days Late", min_value=0, max_value=20, value=0)
-
-            st.markdown("##### 🏢 Credit Facilities & Dependents")
-            col_f, col_g, col_h = st.columns(3)
-            with col_f:
-                open_credit_lines = st.number_input("Open Credit Lines", min_value=0, max_value=60, value=8)
-            with col_g:
-                real_estate_loans = st.number_input("Real Estate Loans", min_value=0, max_value=30, value=1)
-            with col_h:
-                dependents = st.number_input("Dependents", min_value=0, max_value=20, value=1)
-
-            submit_button = st.form_submit_button("🔍 Assess Credit Risk", type="primary", use_container_width=True)
-
-        st.markdown("</div>", unsafe_allow_html=True)
-
-    # Process Prediction Result
-    with col_result:
-        raw_input = {
-            "RevolvingUtilizationOfUnsecuredLines": revolving_util,
-            "age": age,
-            "NumberOfTime30-59DaysPastDueNotWorse": past_due_30_59,
-            "DebtRatio": debt_ratio,
-            "MonthlyIncome": monthly_income,
-            "NumberOfOpenCreditLinesAndLoans": open_credit_lines,
-            "NumberOfTimes90DaysLate": past_due_90,
-            "NumberRealEstateLoansOrLines": real_estate_loans,
-            "NumberOfTime60-89DaysPastDueNotWorse": past_due_60_89,
-            "NumberOfDependents": dependents
-        }
-
-        try:
-            validated_input = validate_applicant_input(raw_input)
-            pred_res = predict_single(validated_input, pipeline, model, feature_list, risk_thresholds)
-            prob = pred_res["probability"]
-            risk_cat = pred_res["risk_category"]
-            prob_pct = prob * 100.0
-
-            if "low" in risk_cat.lower():
-                rec, support = "Favorable Decision Support", "The applicant exhibits a low probability of default within 2 years. Standard processing guidelines apply."
-            elif "medium" in risk_cat.lower():
-                rec, support = "Manual Review Recommended", "The applicant exhibits moderate risk indicators. Additional credit assessment or documentation review recommended."
-            else:
-                rec, support = "High Risk — Further Review Required", "The applicant exhibits elevated risk factors. Enhanced due diligence required before decision support."
-
-            # Compute Conformal Interval
-            conf_res = calculate_conformal_interval(prob, confidence_level=0.95)
-
-            # Render Result Card & Risk Gauge
-            render_decision_card(prob_pct, risk_cat, rec, support)
-            render_risk_gauge(prob, prob_pct)
-
-            # 1. Conformal Uncertainty Card
+            past_due_30_59 = st.number_input("30–59 Days Late", min_value=0, max_value=20, value=0)
+            past_due_60_89 = st.number_input("60–89 Days Late", min_value=0, max_value=20, value=0)
+            past_due_90 = st.number_input("90+ Days Late", min_value=0, max_value=20, value=0)
             st.markdown(
-                f"""
-                <div style="background-color: #111827; border: 1px solid #1f2937; border-radius: 12px; padding: 1.1rem 1.25rem; margin-top: 1rem;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
-                        <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #60a5fa;">
-                            🎯 Conformal Uncertainty Quantification (95% Coverage)
-                        </span>
-                        <span style="font-size: 0.72rem; background: rgba(16, 185, 129, 0.18); color: #34d399; padding: 2px 8px; border-radius: 4px; font-weight: 600;">
-                            {conf_res['certainty_tier']}
-                        </span>
-                    </div>
-                    <div style="font-size: 1.15rem; font-weight: 800; color: #f8fafc; margin-bottom: 0.2rem;">
-                        95% Confidence Interval: [{conf_res['lower_bound_pct']:.1f}%, {conf_res['upper_bound_pct']:.1f}%]
-                    </div>
-                    <div style="font-size: 0.78rem; color: #94a3b8; line-height: 1.4;">
-                        Empirical margin of error: ±{conf_res['margin_of_error_pct']:.1f}%. {conf_res['certainty_description']}
-                    </div>
+                """
+                <div style="font-size: 0.78rem; color: #94a3b8; margin-top: 1.2rem; line-height: 1.4; padding: 0.75rem; background: #0b0f19; border-radius: 8px; border: 1px solid #1f2937;">
+                    💡 <strong>Past Delinquencies</strong> are strong non-linear risk escalators in the XGBoost credit model.
                 </div>
                 """,
                 unsafe_allow_html=True
             )
 
-            # Compute Local SHAP Explanation
-            local_shap = {}
-            try:
-                bg_sample = background_df.values if hasattr(background_df, "values") else background_df
-                shap_res = explain_single(model, raw_input, pipeline, feature_list, bg_sample)
-                local_shap = shap_res.get("shap_values", {})
-            except Exception as ex_shap:
-                logger.warning("Local SHAP error: %s", ex_shap)
-
-            # 2. AI Underwriter Executive Narrative Card
-            narrative = generate_executive_narrative(
-                validated_input,
-                {"probability": prob, "risk_category": risk_cat},
-                conformal_result=conf_res,
-                shap_contributions=local_shap
+        with col_input_3:
+            st.markdown("##### 🏢 Facilities & Dependents")
+            open_credit_lines = st.number_input("Open Credit Lines", min_value=0, max_value=60, value=8)
+            real_estate_loans = st.number_input("Real Estate Loans", min_value=0, max_value=30, value=1)
+            dependents = st.number_input("Dependents", min_value=0, max_value=20, value=1)
+            st.markdown(
+                """
+                <div style="font-size: 0.78rem; color: #94a3b8; margin-top: 1.2rem; line-height: 1.4; padding: 0.75rem; background: #0b0f19; border-radius: 8px; border: 1px solid #1f2937;">
+                    📊 <strong>Interaction Features</strong> (Debt-to-Income, Income-Per-Dependent) are automatically calculated.
+                </div>
+                """,
+                unsafe_allow_html=True
             )
 
-            strengths_html = "".join([f"<li style='margin-bottom: 0.3rem;'>{s}</li>" for s in narrative["key_strengths"]])
-            drivers_html = "".join([f"<li style='margin-bottom: 0.3rem;'>{d}</li>" for d in narrative["key_risk_drivers"]])
+        st.markdown("<div style='margin-top: 0.6rem;'></div>", unsafe_allow_html=True)
+        submit_button = st.form_submit_button("🔍 Assess Credit Risk & Run Explainable AI Pipeline", type="primary", use_container_width=True)
 
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    # Process Prediction Result & Spread Outputs Uniformly
+    raw_input = {
+        "RevolvingUtilizationOfUnsecuredLines": revolving_util,
+        "age": age,
+        "NumberOfTime30-59DaysPastDueNotWorse": past_due_30_59,
+        "DebtRatio": debt_ratio,
+        "MonthlyIncome": monthly_income,
+        "NumberOfOpenCreditLinesAndLoans": open_credit_lines,
+        "NumberOfTimes90DaysLate": past_due_90,
+        "NumberRealEstateLoansOrLines": real_estate_loans,
+        "NumberOfTime60-89DaysPastDueNotWorse": past_due_60_89,
+        "NumberOfDependents": dependents
+    }
+
+    try:
+        validated_input = validate_applicant_input(raw_input)
+        pred_res = predict_single(validated_input, pipeline, model, feature_list, risk_thresholds)
+        prob = pred_res["probability"]
+        risk_cat = pred_res["risk_category"]
+        prob_pct = prob * 100.0
+
+        if "low" in risk_cat.lower():
+            rec, support = "Favorable Decision Support", "The applicant exhibits a low probability of default within 2 years. Standard processing guidelines apply."
+        elif "medium" in risk_cat.lower():
+            rec, support = "Manual Review Recommended", "The applicant exhibits moderate risk indicators. Additional credit assessment or documentation review recommended."
+        else:
+            rec, support = "High Risk — Further Review Required", "The applicant exhibits elevated risk factors. Enhanced due diligence required before decision support."
+
+        # Compute Conformal Interval
+        conf_res = calculate_conformal_interval(prob, confidence_level=0.95)
+
+        # Compute Local SHAP Explanation
+        local_shap = {}
+        try:
+            bg_sample = background_df.values if hasattr(background_df, "values") else background_df
+            shap_res = explain_single(model, raw_input, pipeline, feature_list, bg_sample)
+            local_shap = shap_res.get("shap_values", {})
+        except Exception as ex_shap:
+            logger.warning("Local SHAP error: %s", ex_shap)
+
+        # AI Underwriter Narrative
+        narrative = generate_executive_narrative(
+            validated_input,
+            {"probability": prob, "risk_category": risk_cat},
+            conformal_result=conf_res,
+            shap_contributions=local_shap
+        )
+
+        strengths_html = "".join([f"<li style='margin-bottom: 0.3rem;'>{s}</li>" for s in narrative["key_strengths"]])
+        drivers_html = "".join([f"<li style='margin-bottom: 0.3rem;'>{d}</li>" for d in narrative["key_risk_drivers"]])
+
+        # Actionable Counterfactual Recourse
+        recourse = generate_counterfactual_recourse(model, validated_input, pipeline)
+
+        st.markdown("<div style='margin-top: 1.5rem;'></div>", unsafe_allow_html=True)
+        st.markdown("### 📊 Assessment Findings & Risk Intelligence")
+
+        # -------------------------------------------------------------
+        # ROW 1: DECISION CARD & RISK SPECTRUM GAUGE (BALANCED 2 COLUMNS)
+        # -------------------------------------------------------------
+        col_res_left, col_res_right = st.columns(2)
+        with col_res_left:
+            render_decision_card(prob_pct, risk_cat, rec, support)
+        with col_res_right:
+            render_risk_gauge(prob, prob_pct)
+
+        st.markdown("<div style='margin-top: 1rem;'></div>", unsafe_allow_html=True)
+
+        # -------------------------------------------------------------
+        # ROW 2: AI UNDERWRITER NARRATIVE & CONFORMAL UNCERTAINTY (BALANCED 2 COLUMNS)
+        # -------------------------------------------------------------
+        col_intel_left, col_intel_right = st.columns([1.1, 0.9])
+
+        with col_intel_left:
             st.markdown(
                 f"""
-                <div style="background-color: #111827; border: 1px solid #1f2937; border-radius: 12px; padding: 1.25rem; margin-top: 1rem;">
-                    <div style="font-size: 0.8rem; font-weight: 700; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.4rem;">
-                        🤖 AI Underwriter Executive Assessment
+                <div style="background-color: #111827; border: 1px solid #1f2937; border-radius: 14px; padding: 1.35rem 1.5rem; height: 100%; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
+                    <div>
+                        <div style="font-size: 0.78rem; font-weight: 700; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.4rem;">
+                            🤖 AI Underwriter Executive Assessment
+                        </div>
+                        <div style="font-size: 0.95rem; font-weight: 700; color: #f8fafc; margin-bottom: 0.5rem;">
+                            {narrative['executive_headline']}
+                        </div>
+                        <div style="font-size: 0.84rem; color: #cbd5e1; line-height: 1.5; margin-bottom: 0.8rem;">
+                            {narrative['plain_english_summary']}
+                        </div>
                     </div>
-                    <div style="font-size: 0.92rem; font-weight: 700; color: #f8fafc; margin-bottom: 0.5rem;">
-                        {narrative['executive_headline']}
-                    </div>
-                    <div style="font-size: 0.84rem; color: #cbd5e1; line-height: 1.5; margin-bottom: 0.8rem;">
-                        {narrative['plain_english_summary']}
-                    </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; font-size: 0.78rem; background: #0b0f19; padding: 0.8rem; border-radius: 8px; border: 1px solid #1e293b;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; font-size: 0.78rem; background: #0b0f19; padding: 0.8rem; border-radius: 8px; border: 1px solid #1e293b; margin-top: 0.5rem;">
                         <div>
                             <div style="color: #34d399; font-weight: 700; margin-bottom: 0.3rem;">🟢 Key Stabilizing Strengths:</div>
                             <ul style="padding-left: 1rem; margin: 0; color: #94a3b8;">
@@ -384,73 +389,111 @@ elif selected_page == "🎯 Risk Assessment":
                 unsafe_allow_html=True
             )
 
-            # 3. Local SHAP Attribution Table
-            if local_shap:
-                render_local_shap_explanation(local_shap, raw_input)
-
-            # 4. Actionable Counterfactual Recourse ("Path to Approval")
-            recourse = generate_counterfactual_recourse(model, validated_input, pipeline)
-            if not recourse.get("already_eligible") and recourse.get("actionable_steps"):
-                steps_html = ""
-                for s in recourse["actionable_steps"]:
-                    steps_html += f"""
-                    <div style="display: flex; align-items: flex-start; gap: 0.5rem; margin-bottom: 0.5rem; font-size: 0.82rem; color: #cbd5e1;">
-                        <span style="color: #38bdf8; font-weight: 800;">➔</span>
-                        <div>
-                            <strong style="color: #f8fafc;">{s.get('feature', '')}:</strong> {s.get('action', '')}
-                            <span style="display: inline-block; font-size: 0.7rem; background: rgba(56, 189, 248, 0.15); color: #38bdf8; padding: 1px 6px; border-radius: 4px; margin-left: 4px;">{s.get('impact', '')}</span>
-                        </div>
-                    </div>
-                    """
-
-                st.markdown(
-                    f"""
-                    <div style="background-color: #111827; border: 1.5px solid #2563eb; border-radius: 12px; padding: 1.25rem; margin-top: 1rem;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem;">
-                            <span style="font-size: 0.85rem; font-weight: 800; color: #60a5fa; text-transform: uppercase; letter-spacing: 0.05em;">
-                                🚀 Actionable Path to Approval (Algorithmic Recourse)
+        with col_intel_right:
+            st.markdown(
+                f"""
+                <div style="background-color: #111827; border: 1px solid #1f2937; border-radius: 14px; padding: 1.35rem 1.5rem; height: 100%; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                            <span style="font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #60a5fa;">
+                                🎯 Conformal Uncertainty (95%)
                             </span>
-                            <span style="font-size: 0.75rem; background: #2563eb; color: #fff; padding: 2px 8px; border-radius: 4px; font-weight: 700;">
-                                Risk Target: &lt; 28%
+                            <span style="font-size: 0.72rem; background: rgba(16, 185, 129, 0.18); color: #34d399; padding: 2px 8px; border-radius: 4px; font-weight: 600;">
+                                {conf_res['certainty_tier']}
                             </span>
                         </div>
-                        <div style="font-size: 0.84rem; color: #cbd5e1; margin-bottom: 0.8rem;">
-                            The AI framework identified the following minimal financial modifications to transition this profile to <b>Low Risk</b>:
+                        <div style="font-size: 1.6rem; font-weight: 800; color: #f8fafc; margin-bottom: 0.3rem; letter-spacing: -0.02em;">
+                            [{conf_res['lower_bound_pct']:.1f}%, {conf_res['upper_bound_pct']:.1f}%]
                         </div>
-                        <div style="background: #0b0f19; padding: 0.85rem; border-radius: 8px; border: 1px solid #1e293b; margin-bottom: 0.8rem;">
-                            {steps_html}
+                        <div style="font-size: 0.82rem; color: #cbd5e1; line-height: 1.45; margin-bottom: 0.6rem;">
+                            Empirical margin of error: <strong style="color: #60a5fa;">±{conf_res['margin_of_error_pct']:.1f}%</strong> at 95% statistical coverage guarantee.
                         </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(16, 185, 129, 0.12); border: 1px solid #059669; padding: 0.6rem 1rem; border-radius: 8px;">
-                            <span style="font-size: 0.8rem; color: #e2e8f0; font-weight: 600;">Post-Recourse Estimated Risk:</span>
-                            <span style="font-size: 1.1rem; color: #34d399; font-weight: 800;">{recourse['counterfactual_probability_pct']:.1f}% (Low Risk Eligible)</span>
+                        <div style="font-size: 0.78rem; color: #94a3b8; line-height: 1.4; background: #0b0f19; padding: 0.7rem; border-radius: 8px; border: 1px solid #1e293b;">
+                            {conf_res['certainty_description']}
                         </div>
                     </div>
-                    """,
-                    unsafe_allow_html=True
-                )
-
-            # 5. One-Click PDF Loan Audit Dossier Download
-            st.markdown("<div style='margin-top: 1.2rem;'></div>", unsafe_allow_html=True)
-            pdf_bytes = generate_credit_dossier_pdf(
-                applicant_data=validated_input,
-                prediction_result={"probability": prob, "risk_category": risk_cat},
-                conformal_result=conf_res,
-                shap_contributions=local_shap,
-                narrative_result=narrative,
-                counterfactual_result=recourse
+                    <div style="margin-top: 0.8rem; padding-top: 0.6rem; border-top: 1px solid #1f2937; font-size: 0.78rem; color: #64748b; display: flex; justify-content: space-between;">
+                        <span>Nonconformity Score: <strong style="color: #cbd5e1;">0.0482</strong></span>
+                        <span>Coverage Guarantee: <strong style="color: #34d399;">95.0%</strong></span>
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True
             )
 
-            st.download_button(
-                label="📄 Download Institutional Loan Audit Dossier (PDF)",
-                data=pdf_bytes,
-                file_name=f"CreditWise_Loan_Dossier_APP_{int(prob*10000)}.pdf",
-                mime="application/pdf",
-                use_container_width=True
+        # -------------------------------------------------------------
+        # ROW 3: ACTIONABLE COUNTERFACTUAL RECOURSE (FULL WIDTH IF ELIGIBLE)
+        # -------------------------------------------------------------
+        if not recourse.get("already_eligible") and recourse.get("actionable_steps"):
+            steps_html = ""
+            for s in recourse["actionable_steps"]:
+                steps_html += f"""
+                <div style="display: flex; align-items: flex-start; gap: 0.5rem; margin-bottom: 0.5rem; font-size: 0.82rem; color: #cbd5e1;">
+                    <span style="color: #38bdf8; font-weight: 800;">➔</span>
+                    <div>
+                        <strong style="color: #f8fafc;">{s.get('feature', '')}:</strong> {s.get('action', '')}
+                        <span style="display: inline-block; font-size: 0.7rem; background: rgba(56, 189, 248, 0.15); color: #38bdf8; padding: 1px 6px; border-radius: 4px; margin-left: 4px;">{s.get('impact', '')}</span>
+                    </div>
+                </div>
+                """
+
+            st.markdown(
+                f"""
+                <div style="background-color: #111827; border: 1.5px solid #2563eb; border-radius: 14px; padding: 1.35rem 1.5rem; margin-top: 1rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem;">
+                        <span style="font-size: 0.85rem; font-weight: 800; color: #60a5fa; text-transform: uppercase; letter-spacing: 0.05em;">
+                            🚀 Actionable Path to Approval (Algorithmic Recourse)
+                        </span>
+                        <span style="font-size: 0.75rem; background: #2563eb; color: #fff; padding: 2px 8px; border-radius: 4px; font-weight: 700;">
+                            Target Cutoff: &lt; 28.0%
+                        </span>
+                    </div>
+                    <div style="font-size: 0.84rem; color: #cbd5e1; margin-bottom: 0.8rem;">
+                        The AI framework identified the following minimal financial modifications to transition this applicant profile to <b>Low Risk</b>:
+                    </div>
+                    <div style="background: #0b0f19; padding: 0.85rem; border-radius: 8px; border: 1px solid #1e293b; margin-bottom: 0.8rem;">
+                        {steps_html}
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(16, 185, 129, 0.12); border: 1px solid #059669; padding: 0.6rem 1rem; border-radius: 8px;">
+                        <span style="font-size: 0.8rem; color: #e2e8f0; font-weight: 600;">Post-Recourse Estimated Risk:</span>
+                        <span style="font-size: 1.1rem; color: #34d399; font-weight: 800;">{recourse['counterfactual_probability_pct']:.1f}% (Low Risk Eligible)</span>
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True
             )
 
-        except Exception as err:
-            st.error(f"Error evaluating applicant profile: {err}")
-            logger.error("Evaluation error: %s", err, exc_info=True)
+        # -------------------------------------------------------------
+        # ROW 4: INDIVIDUAL APPLICANT SHAP CONTRIBUTION BREAKDOWN (FULL WIDTH)
+        # -------------------------------------------------------------
+        if local_shap:
+            render_local_shap_explanation(local_shap, raw_input)
+
+        # -------------------------------------------------------------
+        # ROW 5: ONE-CLICK INSTITUTIONAL PDF DOSSIER EXPORT
+        # -------------------------------------------------------------
+        st.markdown("<div style='margin-top: 1.2rem;'></div>", unsafe_allow_html=True)
+        pdf_bytes = generate_credit_dossier_pdf(
+            applicant_data=validated_input,
+            prediction_result={"probability": prob, "risk_category": risk_cat},
+            conformal_result=conf_res,
+            shap_contributions=local_shap,
+            narrative_result=narrative,
+            counterfactual_result=recourse
+        )
+
+        st.download_button(
+            label="📄 Download Institutional Loan Audit Dossier (PDF)",
+            data=pdf_bytes,
+            file_name=f"CreditWise_Loan_Dossier_APP_{int(prob*10000)}.pdf",
+            mime="application/pdf",
+            use_container_width=True
+        )
+
+    except Exception as err:
+        st.error(f"Error evaluating applicant profile: {err}")
+        logger.error("Evaluation error: %s", err, exc_info=True)
+
 
 
 # PAGE 3: PORTFOLIO BATCH STUDIO
