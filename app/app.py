@@ -15,6 +15,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
 import streamlit as st
 
 # Ensure repository root and app directory are on Python path
@@ -51,7 +53,7 @@ try:
     )
     from components.risk_gauge import render_risk_gauge
     from components.charts import (
-        create_model_comparison_bar_chart, create_confusion_matrix_heatmap,
+        DARK_LAYOUT, create_model_comparison_bar_chart, create_confusion_matrix_heatmap,
         create_shap_summary_bar_chart
     )
     from components.explanations import render_local_shap_explanation
@@ -63,7 +65,7 @@ except ModuleNotFoundError:
     )
     from app.components.risk_gauge import render_risk_gauge
     from app.components.charts import (
-        create_model_comparison_bar_chart, create_confusion_matrix_heatmap,
+        DARK_LAYOUT, create_model_comparison_bar_chart, create_confusion_matrix_heatmap,
         create_shap_summary_bar_chart
     )
     from app.components.explanations import render_local_shap_explanation
