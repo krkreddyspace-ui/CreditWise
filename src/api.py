@@ -266,6 +266,150 @@ def explain_applicant_risk(profile: ApplicantProfile):
         )
 
 
+from src.conformal import calculate_conformal_interval
+from src.counterfactual import generate_counterfactual_recourse
+from src.narrative import generate_executive_narrative
+from src.pdf_generator import generate_credit_dossier_pdf
+from fastapi.responses import Response
+
+
+class ConformalResponse(BaseModel):
+    point_probability: float
+    lower_bound: float
+    upper_bound: float
+    lower_bound_pct: float
+    upper_bound_pct: float
+    confidence_level: float
+    certainty_tier: str
+    certainty_description: str
+
+
+class RecourseStep(BaseModel):
+    feature: str
+    action: str
+    impact: str
+
+
+class RecourseResponse(BaseModel):
+    original_probability_pct: float
+    target_probability: float
+    counterfactual_probability_pct: float
+    risk_reduction_pp: float
+    is_recourse_found: bool
+    already_eligible: bool
+    actionable_steps: List[Any]
+    delta_table: List[Dict[str, Any]]
+
+
+class NarrativeResponse(BaseModel):
+    executive_headline: str
+    tone_verdict: str
+    underwriting_recommendation: str
+    plain_english_summary: str
+    key_strengths: List[str]
+    key_risk_drivers: List[str]
+
+
+@app.post("/conformal", response_model=ConformalResponse, tags=["Uncertainty Quantification"])
+def evaluate_conformal_uncertainty(profile: ApplicantProfile, confidence_level: float = 0.95):
+    """Calculates conformal prediction interval and uncertainty band for applicant risk."""
+    try:
+        raw_dict = profile.to_raw_dict()
+        validated = validate_applicant_input(raw_dict)
+        pred_res = predict_single(validated, use_calibrated=True)
+        prob = pred_res["default_probability"]
+        res = calculate_conformal_interval(prob, confidence_level=confidence_level)
+        return ConformalResponse(**res)
+    except Exception as e:
+        logger.error("API /conformal error: %s", e, exc_info=True)
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+@app.post("/recourse", response_model=RecourseResponse, tags=["Explainability"])
+def get_actionable_recourse(profile: ApplicantProfile, target_threshold: float = 0.28):
+    """Generates actionable counterfactual steps to help applicant reach low-risk threshold."""
+    try:
+        arts = get_system_artefacts()
+        raw_dict = profile.to_raw_dict()
+        validated = validate_applicant_input(raw_dict)
+        res = generate_counterfactual_recourse(
+            arts["model"], validated, arts["pipeline"], target_threshold=target_threshold
+        )
+        return RecourseResponse(**res)
+    except Exception as e:
+        logger.error("API /recourse error: %s", e, exc_info=True)
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+@app.post("/narrative", response_model=NarrativeResponse, tags=["Explainability"])
+def get_executive_narrative(profile: ApplicantProfile):
+    """Generates plain-English underwriter executive narrative report."""
+    try:
+        arts = get_system_artefacts()
+        raw_dict = profile.to_raw_dict()
+        validated = validate_applicant_input(raw_dict)
+        pred_res = predict_single(validated, use_calibrated=True)
+        prob = pred_res["default_probability"]
+        conf_res = calculate_conformal_interval(prob)
+        
+        shap_exp = explain_single(arts["model"], validated, arts["pipeline"], arts["feature_names"])
+        shap_vals = shap_exp.get("shap_values", {})
+
+        narrative = generate_executive_narrative(
+            validated,
+            {"probability": prob, "risk_category": pred_res["risk_label"]},
+            conformal_result=conf_res,
+            shap_contributions=shap_vals
+        )
+        return NarrativeResponse(**narrative)
+    except Exception as e:
+        logger.error("API /narrative error: %s", e, exc_info=True)
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+@app.post("/dossier/pdf", tags=["Reporting"])
+def download_pdf_dossier(profile: ApplicantProfile):
+    """Generates and downloads a complete institutional PDF Credit Risk Dossier."""
+    try:
+        arts = get_system_artefacts()
+        raw_dict = profile.to_raw_dict()
+        validated = validate_applicant_input(raw_dict)
+        pred_res = predict_single(validated, use_calibrated=True)
+        prob = pred_res["default_probability"]
+        conf_res = calculate_conformal_interval(prob)
+        
+        shap_exp = explain_single(arts["model"], validated, arts["pipeline"], arts["feature_names"])
+        shap_vals = shap_exp.get("shap_values", {})
+
+        narrative = generate_executive_narrative(
+            validated,
+            {"probability": prob, "risk_category": pred_res["risk_label"]},
+            conformal_result=conf_res,
+            shap_contributions=shap_vals
+        )
+
+        recourse = generate_counterfactual_recourse(arts["model"], validated, arts["pipeline"])
+
+        pdf_bytes = generate_credit_dossier_pdf(
+            applicant_data=validated,
+            prediction_result={"probability": prob, "risk_category": pred_res["risk_label"]},
+            conformal_result=conf_res,
+            shap_contributions=shap_vals,
+            narrative_result=narrative,
+            counterfactual_result=recourse
+        )
+
+        return Response(
+            content=pdf_bytes,
+            media_type="application/pdf",
+            headers={"Content-Disposition": "attachment; filename=CreditWise_Audit_Dossier.pdf"}
+        )
+    except Exception as e:
+        logger.error("API /dossier/pdf error: %s", e, exc_info=True)
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("src.api:app", host="0.0.0.0", port=8000, reload=True)
+

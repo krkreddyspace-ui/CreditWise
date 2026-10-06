@@ -37,6 +37,10 @@ from src.predict import (
     validate_applicant_input
 )
 from src.explainability import explain_single, TREE_MODEL_TYPES
+from src.conformal import calculate_conformal_interval
+from src.counterfactual import generate_counterfactual_recourse
+from src.narrative import generate_executive_narrative
+from src.pdf_generator import generate_credit_dossier_pdf
 
 # Superdesign Modular Component Imports (Robust to execution directory)
 try:
@@ -299,26 +303,339 @@ elif selected_page == "🎯 Risk Assessment":
             else:
                 rec, support = "High Risk — Further Review Required", "The applicant exhibits elevated risk factors. Enhanced due diligence required before decision support."
 
+            # Compute Conformal Interval
+            conf_res = calculate_conformal_interval(prob, confidence_level=0.95)
+
             # Render Result Card & Risk Gauge
             render_decision_card(prob_pct, risk_cat, rec, support)
             render_risk_gauge(prob, prob_pct)
 
-            # Compute Local SHAP Explanation for the Applicant
-            st.markdown("##### 🔍 Local Contributing Factors")
+            # 1. Conformal Uncertainty Card
+            st.markdown(
+                f"""
+                <div style="background-color: #111827; border: 1px solid #1f2937; border-radius: 12px; padding: 1.1rem 1.25rem; margin-top: 1rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                        <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #60a5fa;">
+                            🎯 Conformal Uncertainty Quantification (95% Coverage)
+                        </span>
+                        <span style="font-size: 0.72rem; background: rgba(16, 185, 129, 0.18); color: #34d399; padding: 2px 8px; border-radius: 4px; font-weight: 600;">
+                            {conf_res['certainty_tier']}
+                        </span>
+                    </div>
+                    <div style="font-size: 1.15rem; font-weight: 800; color: #f8fafc; margin-bottom: 0.2rem;">
+                        95% Confidence Interval: [{conf_res['lower_bound_pct']:.1f}%, {conf_res['upper_bound_pct']:.1f}%]
+                    </div>
+                    <div style="font-size: 0.78rem; color: #94a3b8; line-height: 1.4;">
+                        Empirical margin of error: ±{conf_res['margin_of_error_pct']:.1f}%. {conf_res['certainty_description']}
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+            # Compute Local SHAP Explanation
+            local_shap = {}
             try:
                 bg_sample = background_df.values if hasattr(background_df, "values") else background_df
                 shap_res = explain_single(model, raw_input, pipeline, feature_list, bg_sample)
                 local_shap = shap_res.get("shap_values", {})
-                render_local_shap_explanation(local_shap, raw_input)
             except Exception as ex_shap:
                 logger.warning("Local SHAP error: %s", ex_shap)
-                st.info("Local SHAP explanation could not be generated for this profile.")
+
+            # 2. AI Underwriter Executive Narrative Card
+            narrative = generate_executive_narrative(
+                validated_input,
+                {"probability": prob, "risk_category": risk_cat},
+                conformal_result=conf_res,
+                shap_contributions=local_shap
+            )
+
+            strengths_html = "".join([f"<li style='margin-bottom: 0.3rem;'>{s}</li>" for s in narrative["key_strengths"]])
+            drivers_html = "".join([f"<li style='margin-bottom: 0.3rem;'>{d}</li>" for d in narrative["key_risk_drivers"]])
+
+            st.markdown(
+                f"""
+                <div style="background-color: #111827; border: 1px solid #1f2937; border-radius: 12px; padding: 1.25rem; margin-top: 1rem;">
+                    <div style="font-size: 0.8rem; font-weight: 700; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.4rem;">
+                        🤖 AI Underwriter Executive Assessment
+                    </div>
+                    <div style="font-size: 0.92rem; font-weight: 700; color: #f8fafc; margin-bottom: 0.5rem;">
+                        {narrative['executive_headline']}
+                    </div>
+                    <div style="font-size: 0.84rem; color: #cbd5e1; line-height: 1.5; margin-bottom: 0.8rem;">
+                        {narrative['plain_english_summary']}
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; font-size: 0.78rem; background: #0b0f19; padding: 0.8rem; border-radius: 8px; border: 1px solid #1e293b;">
+                        <div>
+                            <div style="color: #34d399; font-weight: 700; margin-bottom: 0.3rem;">🟢 Key Stabilizing Strengths:</div>
+                            <ul style="padding-left: 1rem; margin: 0; color: #94a3b8;">
+                                {strengths_html if strengths_html else '<li>Baseline financial stability maintained.</li>'}
+                            </ul>
+                        </div>
+                        <div>
+                            <div style="color: #f87171; font-weight: 700; margin-bottom: 0.3rem;">🔴 Primary Risk Escalators:</div>
+                            <ul style="padding-left: 1rem; margin: 0; color: #94a3b8;">
+                                {drivers_html if drivers_html else '<li>No elevated risk drivers detected.</li>'}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+            # 3. Local SHAP Attribution Table
+            if local_shap:
+                render_local_shap_explanation(local_shap, raw_input)
+
+            # 4. Actionable Counterfactual Recourse ("Path to Approval")
+            recourse = generate_counterfactual_recourse(model, validated_input, pipeline)
+            if not recourse.get("already_eligible") and recourse.get("actionable_steps"):
+                steps_html = ""
+                for s in recourse["actionable_steps"]:
+                    steps_html += f"""
+                    <div style="display: flex; align-items: flex-start; gap: 0.5rem; margin-bottom: 0.5rem; font-size: 0.82rem; color: #cbd5e1;">
+                        <span style="color: #38bdf8; font-weight: 800;">➔</span>
+                        <div>
+                            <strong style="color: #f8fafc;">{s.get('feature', '')}:</strong> {s.get('action', '')}
+                            <span style="display: inline-block; font-size: 0.7rem; background: rgba(56, 189, 248, 0.15); color: #38bdf8; padding: 1px 6px; border-radius: 4px; margin-left: 4px;">{s.get('impact', '')}</span>
+                        </div>
+                    </div>
+                    """
+
+                st.markdown(
+                    f"""
+                    <div style="background-color: #111827; border: 1.5px solid #2563eb; border-radius: 12px; padding: 1.25rem; margin-top: 1rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem;">
+                            <span style="font-size: 0.85rem; font-weight: 800; color: #60a5fa; text-transform: uppercase; letter-spacing: 0.05em;">
+                                🚀 Actionable Path to Approval (Algorithmic Recourse)
+                            </span>
+                            <span style="font-size: 0.75rem; background: #2563eb; color: #fff; padding: 2px 8px; border-radius: 4px; font-weight: 700;">
+                                Risk Target: &lt; 28%
+                            </span>
+                        </div>
+                        <div style="font-size: 0.84rem; color: #cbd5e1; margin-bottom: 0.8rem;">
+                            The AI framework identified the following minimal financial modifications to transition this profile to <b>Low Risk</b>:
+                        </div>
+                        <div style="background: #0b0f19; padding: 0.85rem; border-radius: 8px; border: 1px solid #1e293b; margin-bottom: 0.8rem;">
+                            {steps_html}
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(16, 185, 129, 0.12); border: 1px solid #059669; padding: 0.6rem 1rem; border-radius: 8px;">
+                            <span style="font-size: 0.8rem; color: #e2e8f0; font-weight: 600;">Post-Recourse Estimated Risk:</span>
+                            <span style="font-size: 1.1rem; color: #34d399; font-weight: 800;">{recourse['counterfactual_probability_pct']:.1f}% (Low Risk Eligible)</span>
+                        </div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+            # 5. One-Click PDF Loan Audit Dossier Download
+            st.markdown("<div style='margin-top: 1.2rem;'></div>", unsafe_allow_html=True)
+            pdf_bytes = generate_credit_dossier_pdf(
+                applicant_data=validated_input,
+                prediction_result={"probability": prob, "risk_category": risk_cat},
+                conformal_result=conf_res,
+                shap_contributions=local_shap,
+                narrative_result=narrative,
+                counterfactual_result=recourse
+            )
+
+            st.download_button(
+                label="📄 Download Institutional Loan Audit Dossier (PDF)",
+                data=pdf_bytes,
+                file_name=f"CreditWise_Loan_Dossier_APP_{int(prob*10000)}.pdf",
+                mime="application/pdf",
+                use_container_width=True
+            )
 
         except Exception as err:
             st.error(f"Error evaluating applicant profile: {err}")
+            logger.error("Evaluation error: %s", err, exc_info=True)
 
 
-# PAGE 3: MODEL INTELLIGENCE & EVALUATION
+# PAGE 3: PORTFOLIO BATCH STUDIO
+elif selected_page == "📁 Portfolio Batch Studio":
+    render_page_header(
+        title="Portfolio Batch Assessment Studio",
+        subtitle="High-throughput portfolio risk scoring, conformal uncertainty intervals, portfolio expected loss analytics, and enriched data exports.",
+        tag="PORTFOLIO INTELLIGENCE"
+    )
+
+    tab_upload, tab_sample = st.tabs(["📤 Upload Portfolio CSV", "📂 Load Preloaded Test Portfolio (250 Records)"])
+
+    df_batch_input = None
+
+    with tab_upload:
+        st.markdown(
+            """
+            <div class="cw-card" style="margin-bottom: 1rem;">
+                <div class="cw-card-header">📤 Bulk Applicant CSV Ingestion</div>
+                <div class="cw-card-subtitle">Upload a CSV file containing applicant financial features matching the dataset schema.</div>
+            """,
+            unsafe_allow_html=True
+        )
+        uploaded_file = st.file_uploader("Choose a CSV file", type=["csv"], key="portfolio_csv_uploader")
+        if uploaded_file is not None:
+            try:
+                df_batch_input = pd.read_csv(uploaded_file)
+                st.success(f"Successfully loaded {len(df_batch_input):,} applicant records.")
+            except Exception as e:
+                st.error(f"Error reading CSV: {e}")
+        st.markdown("</div>", unsafe_allow_html=True)
+
+        # Template Download
+        sample_template = pd.DataFrame([{
+            "RevolvingUtilizationOfUnsecuredLines": 0.25,
+            "age": 42,
+            "NumberOfTime30-59DaysPastDueNotWorse": 0,
+            "DebtRatio": 0.30,
+            "MonthlyIncome": 6000.0,
+            "NumberOfOpenCreditLinesAndLoans": 8,
+            "NumberOfTimes90DaysLate": 0,
+            "NumberRealEstateLoansOrLines": 1,
+            "NumberOfTime60-89DaysPastDueNotWorse": 0,
+            "NumberOfDependents": 1
+        }])
+        csv_template = sample_template.to_csv(index=False).encode('utf-8')
+        st.download_button(
+            label="📥 Download Sample Batch Template (CSV)",
+            data=csv_template,
+            file_name="creditwise_batch_template.csv",
+            mime="text/csv"
+        )
+
+    with tab_sample:
+        if st.button("🚀 Load Preloaded Portfolio Sample (250 Applicants)", type="primary"):
+            # Generate deterministic realistic batch sample
+            rng = np.random.default_rng(42)
+            n_samples = 250
+            sample_data = {
+                "RevolvingUtilizationOfUnsecuredLines": np.clip(rng.exponential(0.35, n_samples), 0.01, 2.5),
+                "age": rng.integers(21, 78, n_samples),
+                "NumberOfTime30-59DaysPastDueNotWorse": rng.choice([0, 1, 2, 3], size=n_samples, p=[0.75, 0.15, 0.07, 0.03]),
+                "DebtRatio": np.clip(rng.exponential(0.38, n_samples), 0.05, 3.0),
+                "MonthlyIncome": rng.integers(2200, 18500, n_samples),
+                "NumberOfOpenCreditLinesAndLoans": rng.integers(2, 22, n_samples),
+                "NumberOfTimes90DaysLate": rng.choice([0, 1, 2], size=n_samples, p=[0.88, 0.09, 0.03]),
+                "NumberRealEstateLoansOrLines": rng.choice([0, 1, 2, 3], size=n_samples, p=[0.40, 0.42, 0.14, 0.04]),
+                "NumberOfTime60-89DaysPastDueNotWorse": rng.choice([0, 1], size=n_samples, p=[0.92, 0.08]),
+                "NumberOfDependents": rng.choice([0, 1, 2, 3], size=n_samples, p=[0.50, 0.25, 0.18, 0.07]),
+            }
+            df_batch_input = pd.DataFrame(sample_data)
+            st.session_state["batch_data"] = df_batch_input
+            st.success(f"Loaded {n_samples} applicant records into portfolio assessment memory.")
+
+    if "batch_data" in st.session_state and df_batch_input is None:
+        df_batch_input = st.session_state["batch_data"]
+
+    if df_batch_input is not None:
+        with st.spinner("Executing calibrated machine learning inference & conformal uncertainty bounds..."):
+            records = df_batch_input.to_dict(orient="records")
+            scored_rows = []
+            for idx, r in enumerate(records):
+                try:
+                    v_input = validate_applicant_input(r)
+                    p_res = predict_single(v_input, pipeline, model, feature_list, risk_thresholds)
+                    p_val = p_res["probability"]
+                    r_cat = p_res["risk_category"]
+                    c_res = calculate_conformal_interval(p_val, confidence_level=0.95)
+
+                    scored_rows.append({
+                        "Applicant_ID": f"APP-{idx+1:04d}",
+                        "Default_Probability": round(p_val, 4),
+                        "Default_Risk_Pct": round(p_val * 100, 2),
+                        "Risk_Category": r_cat.capitalize(),
+                        "Conformal_95_CI": f"[{c_res['lower_bound_pct']:.1f}%, {c_res['upper_bound_pct']:.1f}%]",
+                        "Certainty_Tier": c_res["certainty_tier"],
+                        "Age": r.get("age"),
+                        "Monthly_Income": r.get("MonthlyIncome"),
+                        "Utilization_Pct": round(float(r.get("RevolvingUtilizationOfUnsecuredLines", 0))*100, 1),
+                        "Debt_Ratio": round(float(r.get("DebtRatio", 0)), 2),
+                        "Late_90d": r.get("NumberOfTimes90DaysLate", 0)
+                    })
+                except Exception as ex_row:
+                    pass
+
+            df_scored = pd.DataFrame(scored_rows)
+
+        if not df_scored.empty:
+            # Portfolio KPI Metrics
+            n_total = len(df_scored)
+            avg_risk = df_scored["Default_Probability"].mean() * 100.0
+            expected_loss_rate = df_scored["Default_Probability"].mean() * 0.45 * 100.0 # Standard 45% Loss Given Default
+            high_risk_cnt = (df_scored["Risk_Category"] == "High").sum()
+            high_risk_share = (high_risk_cnt / n_total) * 100.0
+
+            st.markdown("<div style='margin-top: 1.5rem;'></div>", unsafe_allow_html=True)
+            k1, k2, k3, k4 = st.columns(4)
+            with k1:
+                render_metric_card("Portfolio Volume", f"{n_total:,}", "Total loans processed", "#3b82f6")
+            with k2:
+                render_metric_card("Average Default Risk", f"{avg_risk:.2f}%", "Mean portfolio probability", "#10b981")
+            with k3:
+                render_metric_card("Expected Loss Rate", f"{expected_loss_rate:.2f}%", "Assuming 45% LGD", "#f59e0b")
+            with k4:
+                render_metric_card("High Risk Concentration", f"{high_risk_share:.1f}%", f"{high_risk_cnt} high-risk files", "#ef4444")
+
+            # Risk Distribution Charts
+            col_pie, col_hist = st.columns([1, 1.2])
+            with col_pie:
+                cat_counts = df_scored["Risk_Category"].value_counts().reset_index()
+                cat_counts.columns = ["Risk Tier", "Count"]
+                fig_pie = px.pie(
+                    cat_counts,
+                    names="Risk Tier",
+                    values="Count",
+                    color="Risk Tier",
+                    color_discrete_map={"Low": "#10b981", "Medium": "#f59e0b", "High": "#ef4444"},
+                    hole=0.45,
+                    title="Portfolio Risk Tier Distribution"
+                )
+                fig_pie.update_layout(**DARK_LAYOUT, height=320)
+                st.plotly_chart(fig_pie, use_container_width=True)
+
+            with col_hist:
+                fig_hist = px.histogram(
+                    df_scored,
+                    x="Default_Risk_Pct",
+                    nbins=20,
+                    color_discrete_sequence=["#3b82f6"],
+                    title="Estimated Default Probability Distribution (%)"
+                )
+                fig_hist.update_layout(**DARK_LAYOUT, height=320, xaxis_title="Default Risk (%)", yaxis_title="Number of Loans")
+                st.plotly_chart(fig_hist, use_container_width=True)
+
+            # Interactive Filtered Grid
+            st.markdown(
+                """
+                <div class="cw-card" style="margin-top: 1rem;">
+                    <div class="cw-card-header">📋 Detailed Portfolio Audit Grid</div>
+                    <div class="cw-card-subtitle">Filter applicants by risk category and explore individual conformal bounds.</div>
+                """,
+                unsafe_allow_html=True
+            )
+
+            filter_cat = st.selectbox("Filter by Risk Category", ["All Categories", "Low", "Medium", "High"])
+            if filter_cat != "All Categories":
+                df_filtered = df_scored[df_scored["Risk_Category"] == filter_cat]
+            else:
+                df_filtered = df_scored
+
+            st.dataframe(df_filtered, use_container_width=True, hide_index=True)
+            st.markdown("</div>", unsafe_allow_html=True)
+
+            # Enriched CSV Download
+            csv_enriched = df_scored.to_csv(index=False).encode('utf-8')
+            st.download_button(
+                label="📥 Export Enriched Portfolio Predictions (CSV)",
+                data=csv_enriched,
+                file_name=f"creditwise_portfolio_scored_{len(df_scored)}_applicants.csv",
+                mime="text/csv",
+                type="primary"
+            )
+
+
+# PAGE 4: MODEL INTELLIGENCE & EVALUATION
 elif selected_page == "⚡ Model Intelligence":
     render_page_header(
         title="Model Intelligence",
@@ -353,15 +670,19 @@ elif selected_page == "⚡ Model Intelligence":
             st.plotly_chart(fig_cm, use_container_width=True)
 
 
-# PAGE 4: SHAP EXPLAINABILITY
-elif selected_page == "🔍 Explainability & SHAP":
+# PAGE 5: EXPLAINABILITY & RECOURSE
+elif selected_page in ["🔍 Explainability & SHAP", "🔍 Explainability & Recourse"]:
     render_page_header(
-        title="Explainability & SHAP",
-        subtitle="Global and local model interpretability using SHapley Additive exPlanations.",
-        tag="MODEL INTERPRETABILITY"
+        title="Explainability & Algorithmic Recourse",
+        subtitle="Global and local model interpretability using SHapley Additive exPlanations and actionable counterfactual recourse.",
+        tag="MODEL INTERPRETABILITY & RECOURSE"
     )
 
-    tab_global, tab_local = st.tabs(["🌐 Global Feature Importance", "👤 Applicant Waterfall Analysis"])
+    tab_global, tab_local, tab_recourse = st.tabs([
+        "🌐 Global Feature Importance",
+        "👤 Applicant Waterfall Analysis",
+        "🛠️ Actionable Recourse Theory"
+    ])
 
     with tab_global:
         st.markdown(
@@ -414,8 +735,32 @@ elif selected_page == "🔍 Explainability & SHAP":
             st.info("Use the 'Risk Assessment' page to generate interactive local SHAP explanations for any custom applicant profile.")
         st.markdown("</div>", unsafe_allow_html=True)
 
+    with tab_recourse:
+        st.markdown(
+            """
+            <div class="cw-card">
+                <div class="cw-card-header">Algorithmic Recourse & Actionability Mathematical Formulation</div>
+                <div class="cw-card-subtitle">How CreditWise solves for minimal-effort applicant credit recovery.</div>
+                <div style="line-height: 1.6; color: #cbd5e1; font-size: 0.9rem; margin-top: 0.8rem;">
+                    <p>
+                        While SHAP explains feature attributions in hindsight, <b>Algorithmic Recourse</b> solves an inverse optimization problem:
+                        finding the minimum actionable perturbation vector <b>δ*</b> such that the modified profile <b>x' = x + δ*</b> achieves a predicted default probability below target threshold <b>θ</b>:
+                    </p>
+                    <div style="background: #0b0f19; padding: 0.8rem; border-radius: 8px; border: 1px solid #1e293b; font-family: monospace; color: #60a5fa; margin: 0.8rem 0;">
+                        arg min_{δ} ||δ||_W  subject to  f(x + δ) &le; θ  and  δ_immutable = 0
+                    </div>
+                    <ul>
+                        <li><b>Actionable / Mutable Features</b>: Credit Utilization, Debt Ratio, Resolving Active Late Accounts, Supplemental Income.</li>
+                        <li><b>Immutable Attributes</b>: Age, Number of Dependents (preserved strictly to comply with Fair Housing & ECOA lending laws).</li>
+                    </ul>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
-# PAGE 5: WHAT-IF SIMULATOR
+
+# PAGE 6: WHAT-IF SIMULATOR
 elif selected_page == "🧪 What-If Simulator":
     render_page_header(
         title="What-If Risk Simulator",

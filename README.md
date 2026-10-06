@@ -96,6 +96,10 @@ CreditWise exposes high-performance REST API endpoints for enterprise integratio
 | `POST /predict` | POST | Single applicant risk prediction & decision support |
 | `POST /predict/batch` | POST | Bulk high-throughput applicant batch inference |
 | `POST /explain` | POST | Local SHAP directional feature contribution breakdown |
+| `POST /conformal` | POST | 90%/95%/99% Conformal prediction interval & certainty tier |
+| `POST /recourse` | POST | Actionable counterfactual recourse & minimal path to approval |
+| `POST /narrative` | POST | Plain-English AI Underwriter Executive Assessment narrative |
+| `POST /dossier/pdf` | POST | Automated institutional PDF Loan Audit Dossier download |
 | `GET /docs` | GET | Interactive OpenAPI Swagger UI |
 
 ### Example REST API Request (`POST /predict`)

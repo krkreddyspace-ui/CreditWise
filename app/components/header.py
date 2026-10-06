@@ -4,13 +4,13 @@ CreditWise — Header Component
 Renders page headers, hero banners, and breadcrumbs in Superdesign style.
 """
 
+import textwrap
 import streamlit as st
 
 
 def render_page_header(title: str, subtitle: str, tag: str = "EXPLAINABLE AI FRAMEWORK") -> None:
     """Renders a page hero banner with superdesign dark typography."""
-    st.markdown(
-        f"""
+    html = textwrap.dedent(f"""
         <div style="margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #1f2937;">
             <div style="font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; color: #3b82f6; text-transform: uppercase; margin-bottom: 0.25rem;">
                 {tag}
@@ -22,6 +22,5 @@ def render_page_header(title: str, subtitle: str, tag: str = "EXPLAINABLE AI FRA
                 {subtitle}
             </div>
         </div>
-        """,
-        unsafe_allow_html=True
-    )
+    """).strip()
+    st.markdown(html, unsafe_allow_html=True)

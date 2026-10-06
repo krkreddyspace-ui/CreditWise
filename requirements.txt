@@ -33,6 +33,9 @@ fastapi>=0.100.0
 uvicorn>=0.20.0
 pydantic>=2.0.0
 
+# Reporting & PDF Generation
+reportlab>=4.0.0
+
 # Testing & Client
 pytest>=8.0.0
 httpx>=0.24.0

@@ -4,16 +4,16 @@ CreditWise — Superdesign Sidebar Component
 Renders brand header, navigation menu, system status badges, and academic disclaimer.
 """
 
-import streamlit as st
+import textwrap
 from typing import Dict, Any
+import streamlit as st
 
 
 def render_sidebar(model_metadata: Dict[str, Any]) -> str:
     """Renders the left sidebar navigation shell."""
     with st.sidebar:
         # Brand & Logo Header
-        st.markdown(
-            """
+        brand_html = textwrap.dedent("""
             <div style="padding: 0.5rem 0 1.25rem 0; border-bottom: 1px solid #1f2937; margin-bottom: 1.25rem;">
                 <div style="display: flex; align-items: center; gap: 0.6rem;">
                     <div style="background: linear-gradient(135deg, #2563eb, #06b6d4); width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #fff; font-size: 1.1rem; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.4);">
@@ -29,9 +29,8 @@ def render_sidebar(model_metadata: Dict[str, Any]) -> str:
                     </div>
                 </div>
             </div>
-            """,
-            unsafe_allow_html=True
-        )
+        """).strip()
+        st.markdown(brand_html, unsafe_allow_html=True)
 
         # Navigation Options
         page = st.radio(
@@ -39,8 +38,9 @@ def render_sidebar(model_metadata: Dict[str, Any]) -> str:
             options=[
                 "📊 Overview",
                 "🎯 Risk Assessment",
+                "📁 Portfolio Batch Studio",
                 "⚡ Model Intelligence",
-                "🔍 Explainability & SHAP",
+                "🔍 Explainability & Recourse",
                 "🧪 What-If Simulator",
                 "📘 Methodology & Ethics"
             ],
@@ -54,8 +54,7 @@ def render_sidebar(model_metadata: Dict[str, Any]) -> str:
         best_model_name = model_metadata.get("best_model_name", "XGBoost (Calibrated)")
         n_test = model_metadata.get("test_set_size", 29879)
 
-        st.markdown(
-            f"""
+        status_html = textwrap.dedent(f"""
             <div style="background-color: #111827; border: 1px solid #1f2937; border-radius: 10px; padding: 0.85rem; margin-bottom: 1rem;">
                 <div style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin-bottom: 0.5rem;">
                     SYSTEM STATUS
@@ -73,19 +72,16 @@ def render_sidebar(model_metadata: Dict[str, Any]) -> str:
                     <span style="font-size: 0.72rem; color: #cbd5e1; font-weight: 600;">{n_test:,} samples</span>
                 </div>
             </div>
-            """,
-            unsafe_allow_html=True
-        )
+        """).strip()
+        st.markdown(status_html, unsafe_allow_html=True)
 
         # Academic Disclaimer Footer
-        st.markdown(
-            """
+        footer_html = textwrap.dedent("""
             <div style="padding-top: 0.75rem; border-top: 1px solid #1f2937; font-size: 0.7rem; color: #64748b; line-height: 1.4;">
                 <strong style="color: #94a3b8;">Academic Prototype Notice</strong><br/>
                 CreditWise is an explainable decision-support prototype. Estimates do not constitute financial advice or automated lending decisions.
             </div>
-            """,
-            unsafe_allow_html=True
-        )
+        """).strip()
+        st.markdown(footer_html, unsafe_allow_html=True)
 
         return page
